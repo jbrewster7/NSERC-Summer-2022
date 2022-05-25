@@ -1,0 +1,20 @@
+includeFile = WaterPhantom.txt
+
+i:Ge/Phantom/XBins = 100
+i:Ge/Phantom/YBins = 100
+i:Ge/Phantom/ZBins = 100
+
+i:So/Demo/NumberOfHistoriesInRun = 10000
+s:So/Demo/BeamParticle = "gamma"
+d:So/Demo/BeamEnergy = 225 keV
+
+s:Sc/WaterKernel/Quantity = "EnergyDeposit"
+s:Sc/WaterKernel/Component = "Phantom"
+
+#Ts/UseQt = "True"
+
+#s:Gr/ViewA/Type = "OpenGL"
+#b:Gr/ViewA/IncludeAxes = "False"
+#d:Gr/ViewA/AxesSize = 1. m
+
+s:Sc/WaterKernel/IfOutputFileAlreadyExists = "Overwrite"

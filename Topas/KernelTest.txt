@@ -1,0 +1,24 @@
+includeFile = /Applications/topas/test_garbage/BoxOfWater.txt
+
+i:So/Demo/NumberOfHistoriesInRun = 1
+s:So/Demo/BeamParticle = "gamma"
+d:So/Demo/BeamEnergy = 225 keV
+
+s:Sc/Scorer/Quantity = "EnergyDeposit"
+s:Sc/Scorer/Component = "Box"
+
+d:Ge/World/HLX = 0.05 m
+d:Ge/World/HLY = 0.05 m
+d:Ge/World/HLZ = 0.05 m
+
+d:Ge/Box/HLX = 0.01 m
+d:Ge/Box/HLY = 0.01 m
+d:Ge/Box/HLZ = 0.01 m
+
+Ts/UseQt = "True"
+
+s:Gr/ViewA/Type = "OpenGL"
+b:Gr/ViewA/IncludeAxes = "False"
+d:Gr/ViewA/AxesSize = 6. m
+
+s:Sc/Scorer/IfOutputFileAlreadyExists = "Overwrite"

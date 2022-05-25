@@ -1,0 +1,20 @@
+includeFile = BoxOfWater.txt
+
+i:Ge/Box/XBins = 8
+i:Ge/Box/YBins = 8
+i:Ge/Box/ZBins = 8
+
+i:So/Demo/NumberOfHistoriesInRun = 100
+s:So/Demo/BeamParticle = "gamma"
+d:So/Demo/BeamEnergy = 225 keV
+
+s:Sc/KernelScorer/Quantity = "EnergyDeposit"
+s:Sc/KernelScorer/Component = "Box"
+
+Ts/UseQt = "True"
+
+s:Gr/ViewA/Type = "OpenGL"
+b:Gr/ViewA/IncludeAxes = "False"
+d:Gr/ViewA/AxesSize = 6. m
+
+s:Sc/KernelScorer/IfOutputFileAlreadyExists = "Overwrite"
