@@ -1,0 +1,16 @@
+# Box of water to include in other things
+
+s:Ge/World/Material = "Air"
+d:Ge/World/HLX = 5. m
+d:Ge/World/HLY = 5. m
+d:Ge/World/HLZ = 5. m
+
+s:Ge/Box/Material = "G4_WATER"
+d:Ge/Box/HLX = 4. m
+d:Ge/Box/HLY = 4. m
+d:Ge/Box/HLZ = 4. m
+s:Ge/Box/Parent = "World"
+s:Ge/Box/Type = "TsBox"
+d:Ge/Box/TransX = 0. m
+d:Ge/Box/TransY = 0. m
+d:Ge/Box/TransZ = 0. m
