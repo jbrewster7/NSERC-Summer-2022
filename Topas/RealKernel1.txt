@@ -3,8 +3,21 @@ includeFile = WaterPhantom.txt
 i:Ge/Phantom/XBins = 100
 i:Ge/Phantom/YBins = 100
 i:Ge/Phantom/ZBins = 100
+s:Ge/Phantom/AssignToRegionNaMed = "targetregion"
+
+d:Interaction = 1. mm
+
+s:Ge/BeamPosition/Parent="World"
+s:Ge/BeamPosition/Type="Group"
+d:Ge/BeamPosition/TransX=0. m
+d:Ge/BeamPosition/TransY=0. m
+d:Ge/BeamPosition/TransZ=0. m
+d:Ge/BeamPosition/RotX=180. deg
+d:Ge/BeamPosition/RotY=0. deg
+d:Ge/BeamPosition/RotZ=0. deg
 
 # I'm not sure what the beam specifications should be 
+
 s:So/XRayBeam/Type = "Beam" # Beam, Isotropic, Emittance or PhaseSpace
 s:So/XRayBeam/Component = "BeamPosition"
 s:So/XRayBeam/BeamParticle = "gamma"
@@ -21,32 +34,24 @@ d:So/XRayBeam/BeamAngularCutoffX = 90. deg
 d:So/XRayBeam/BeamAngularCutoffY = 90. deg
 d:So/XRayBeam/BeamAngularSpreadX = 0.0032 rad
 d:So/XRayBeam/BeamAngularSpreadY = 0.0032 rad
-i:So/XRayBeam/NumberOfHistoriesInRun = 9
-i:So/XRayBeam/NumberOfHistoriesInRandomJob = 0
+i:So/XRayBeam/NumberOfHistoriesInRun = 100000
+i:So/XRayBeam/NumberOfHistoriesInRandomJob = 0 # do I need this?
 
-#i:Ts/ShowHistoryCountAtInterval = 10000
+i:Ts/ShowHistoryCountAtInterval = 10000
 #b:Ts/ShowCPUTime = "True"
 
 s:Sc/RealKernel1/Quantity = "EnergyDeposit"
 s:Sc/RealKernel1/Component = "Phantom"
 
-Ts/UseQt = "True"
+#Ts/UseQt = "True"
 
-s:Gr/ViewA/Type = "OpenGL"
-b:Gr/ViewA/IncludeAxes = "True"
-d:Gr/ViewA/AxesSize = 1. m
+#s:Gr/ViewA/Type = "OpenGL"
+#b:Gr/ViewA/IncludeAxes = "True"
+#d:Gr/ViewA/AxesSize = 1. m
 
 s:Sc/RealKernel1/IfOutputFileAlreadyExists = "Overwrite"
 
-s:Tf/ActiveVRT/Function = "step"
-dv:Tf/ActiveVRT/Times    = 1 13 ms
-dv:Tf/ActiveVRT/Values   = 1 Ge/World/HLZ mm 
-
-Tf/TimeLineEnd = 13 ms
-Tf/NumberOfSequentialTimes = 1
-
-b:Vr/UseVarianceReduction = "true"
+b:Vr/UseVarianceReduction = "True"
 s:Vr/ForcedInteraction/Type   = "ForcedInteraction"
 sv:Vr/ForcedInteraction/forregion/targetregion/processesNamed   = 2 "compt" "conv"
-dv:Vr/ForcedInteraction/ForRegion/targetregion/ForcedDistances  = 2 Tf/ActiveVRT/Value Tf/ActiveVRT/Value mm
-b:Vr/ForcedInteraction/ForRegion/targetregion/CorrectByWeight = "True"
+dv:Vr/ForcedInteraction/ForRegion/targetregion/ForcedDistances  = 2 Interaction Interaction mm
