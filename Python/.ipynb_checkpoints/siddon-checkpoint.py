@@ -316,9 +316,9 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     
     # DENSITY FUNCTION IS NOT REAL YET 
     for index in range(len(voxel_info)):
-        fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'])*voxel_info[index]['d'])
         voxel_info[index]['TERMA'] = beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'])/density(voxel_info[index]['indices'])
-        
+        fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'])*voxel_info[index]['d'])
+    
     return voxel_info 
 
 
@@ -410,7 +410,7 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
             kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*dx/kernel_info['x']['voxel_size'],center_coor[1]+voxel_diff[1]*dy/kernel_info['y']['voxel_size'],center_coor[2]+voxel_diff[1]*dz/kernel_info['z']['voxel_size']))
             # still need to figure out TERMA properly
             energy_deposit[n]['energy'] += kernel_value * voxel['TERMA']
-        
+            print(kernel_value)
         first_time = False
             
     return energy_deposit
