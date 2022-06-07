@@ -386,10 +386,11 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
     energy_deposit = []
     
     # making array for labelling voxels 
-    x_voxels = np.linspace(0,Nx-2,Nx-1)
-    y_voxels = np.linspace(0,Ny-2,Ny-1)
-    z_voxels = np.linspace(0,Nz-2,Nz-1)
+    x_voxels = np.linspace(0,Nx-2,Nx-1,dtype=np.uint16)
+    y_voxels = np.linspace(0,Ny-2,Ny-1,dtype=np.uint16)
+    z_voxels = np.linspace(0,Nz-2,Nz-1,dtype=np.uint16)
     
+    # this is where I can lower size of data too 
     voxel_array = np.array([[x,y,z] for x in x_voxels for y in y_voxels for z in z_voxels])
     
     voxel_diff = ['','','']
