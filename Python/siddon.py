@@ -382,7 +382,7 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
     kernel_func = interpolate.RegularGridInterpolator((x,y,z),kernel_array,bounds_error=False,fill_value=0)
     
     center_coor = (int(np.floor(len(kernel_array)/2)),int(np.floor(len(kernel_array[0])/2)),int(np.floor(len(kernel_array[0][0])/2)))
-    
+        
     energy_deposit = []
     
     # making array for labelling voxels 
@@ -398,19 +398,18 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
     
     for voxel in voxel_info:
         for n in range(len(voxel_array)):
-            voxel_diff[0] = voxel_array[n][0] - voxel['indices'][0]-1
-            voxel_diff[1] = voxel_array[n][1] - voxel['indices'][1]-1
-            voxel_diff[2] = voxel_array[n][2] - voxel['indices'][2]-1
+            voxel_diff[0] = voxel_array[n][0] - (voxel['indices'][0]-1)
+            voxel_diff[1] = voxel_array[n][1] - (voxel['indices'][1]-1)
+            voxel_diff[2] = voxel_array[n][2] - (voxel['indices'][2]-1)
             
             if first_time:
                 energy_deposit.append({})
                 energy_deposit[n]['indices'] = (voxel_array[n][0]+1,voxel_array[n][1]+1,voxel_array[n][2]+1)
                 energy_deposit[n]['energy'] = 0 
             
-            kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*dx/kernel_info['x']['voxel_size'],center_coor[1]+voxel_diff[1]*dy/kernel_info['y']['voxel_size'],center_coor[2]+voxel_diff[1]*dz/kernel_info['z']['voxel_size']))
-            # still need to figure out TERMA properly
+            kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*dx/kernel_info['x']['voxel_size'],center_coor[1]+voxel_diff[1]*dy/kernel_info['y']['voxel_size'],center_coor[2]+voxel_diff[2]*dz/kernel_info['z']['voxel_size']))
             energy_deposit[n]['energy'] += kernel_value * voxel['TERMA']
-            print(kernel_value)
+        
         first_time = False
             
     return energy_deposit
