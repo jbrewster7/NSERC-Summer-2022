@@ -34,7 +34,7 @@ d:So/XRayBeam/BeamAngularCutoffX = 90. deg
 d:So/XRayBeam/BeamAngularCutoffY = 90. deg
 d:So/XRayBeam/BeamAngularSpreadX = 0.0 rad
 d:So/XRayBeam/BeamAngularSpreadY = 0.0 rad
-i:So/XRayBeam/NumberOfHistoriesInRun = 1000000
+i:So/XRayBeam/NumberOfHistoriesInRun = 900000000
 i:So/XRayBeam/NumberOfHistoriesInRandomJob = 0 # do I need this?
 
 i:Ts/ShowHistoryCountAtInterval = 10000
@@ -53,5 +53,5 @@ s:Sc/RealKernel1/IfOutputFileAlreadyExists = "Overwrite"
 
 b:Vr/UseVarianceReduction = "True"
 s:Vr/ForcedInteraction/Type   = "ForcedInteraction"
-sv:Vr/ForcedInteraction/forregion/targetregion/processesNamed   = 2 "compt" "conv"
+sv:Vr/ForcedInteraction/forregion/targetregion/processesNamed   = 3 "compt" "conv" "eBrem"
 dv:Vr/ForcedInteraction/ForRegion/targetregion/ForcedDistances  = 2 Interaction Interaction mm
