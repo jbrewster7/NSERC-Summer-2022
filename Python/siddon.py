@@ -383,8 +383,6 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
     
     center_coor = (int(np.floor(len(kernel_array)/2)),int(np.floor(len(kernel_array[0])/2)),int(np.floor(len(kernel_array[0][0])/2)))
         
-    energy_deposit = []
-    
     # making array for labelling voxels 
     x_voxels = np.linspace(0,Nx-2,Nx-1,dtype=np.uint16)
     y_voxels = np.linspace(0,Ny-2,Ny-1,dtype=np.uint16)
@@ -395,25 +393,38 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
     
     voxel_diff = ['','','']
     
-    first_time = True
+    energy_deposit = []
     
-    for voxel in voxel_info:
-        for n in range(len(voxel_array)):
-            voxel_diff[0] = voxel_array[n][0] - (voxel['indices'][0]-1)
-            voxel_diff[1] = voxel_array[n][1] - (voxel['indices'][1]-1)
-            voxel_diff[2] = voxel_array[n][2] - (voxel['indices'][2]-1)
-            
-            if first_time:
-                energy_deposit.append({})
-                energy_deposit[n]['indices'] = (voxel_array[n][0]+1,voxel_array[n][1]+1,voxel_array[n][2]+1)
-                energy_deposit[n]['energy'] = 0 
-            
-            kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*dx/kernel_info['x']['voxel_size'],center_coor[1]+voxel_diff[1]*dy/kernel_info['y']['voxel_size'],center_coor[2]+voxel_diff[2]*dz/kernel_info['z']['voxel_size']))
-            energy_deposit[n]['energy'] += kernel_value * voxel['TERMA']
+    for ray in range(len(voxel_info)):
+        energy_deposit.append([])
+        count_voxel_inds = 0 
+        for voxel_ind in range(len(voxel_info[ray])):
+            if voxel_info[ray][voxel_ind]['d'] != 0:
+                kernel_value_total = 0
+                energy_deposit[ray].append([])
+                for n in range(len(voxel_array)):
+                    voxel_diff[0] = voxel_array[n][0] - (voxel_info[ray][voxel_ind]['indices'][0]-1)
+                    voxel_diff[1] = voxel_array[n][1] - (voxel_info[ray][voxel_ind]['indices'][1]-1)
+                    voxel_diff[2] = voxel_array[n][2] - (voxel_info[ray][voxel_ind]['indices'][2]-1)
+
+                    kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*dx/kernel_info['x']['voxel_size'],center_coor[1]+voxel_diff[1]*dy/kernel_info['y']['voxel_size'],center_coor[2]+voxel_diff[2]*dz/kernel_info['z']['voxel_size']))
+                    energy_deposit[ray][count_voxel_inds].append(kernel_value * voxel_info[ray][voxel_ind]['TERMA'])
+                    kernel_value_total += kernel_value
+
+                energy_deposit[ray][count_voxel_inds] = np.array(energy_deposit[ray][count_voxel_inds])
+
+                if kernel_value_total != 0:
+                    energy_deposit[ray][count_voxel_inds] = energy_deposit[ray][count_voxel_inds]/kernel_value_total
+                
+                count_voxel_inds += 1
         
-        first_time = False
-            
+        energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
+    
+    energy_deposit = np.array(sum(energy_deposit))
+    energy_deposit = energy_deposit.reshape(Nx-1,Ny-1,Nz-1)
+    
     return energy_deposit
+    
     
 
 def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename,kernelname,kernel_size):
@@ -449,17 +460,18 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     Returns:
     -------
-    energy_deposit :: list 
-      list of dictionaries each with keys 'indices' (the (x,y,z) indices of the voxel) and 'energy' (the energy deposited in 
-      each voxel i.e. the dose) 
+    energy_deposit :: numpy array (Nx-1,Ny-1,Nz-1)
+      numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
-    # ini_fluence might have to be calculated here
+    voxel_info = []
+    for n in range(len(beam_coor)): 
+        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),filename))
     
-    voxel_info = TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename)
-        
-    kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array    
-    kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array 
-            
+    # I don't think I really need to do this anymore... but it kinda keeps it clean so idk
+    # maybe take this out later
+    kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
+    kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
+    
     energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info)
     return energy_deposit
