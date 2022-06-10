@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from scipy import interpolate
 from topas2numpy import BinnedResult
+from multiprocessing import Pool
 
 def alpha_func(plane,coor1,coor2):
     '''
@@ -259,8 +260,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     
     return(voxel_info)
 
-# filename variable is going to have to change as I move to not just calculating water 
-def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename):
+def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,mu):
     '''
     Parameters:
     ----------
@@ -282,26 +282,16 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     ini_fluence :: float
       the initial photon fluence in cm^-2
     
-    filename :: str 
-      name of the file that contains values for energy absorption coefficients 
+    mu :: function
+      function that takes energy and material as arguments and returns energy absorption coefficient
     
     Returns:
     -------
     voxel_info :: list 
       list of dictionaries each with keys 'd' (distance spent in voxel in cm), 'indices' (the (x,y,z) indices of the voxel),
       and 'TERMA' (the total energy released per unit mass in that voxel)
-    '''
-    coeff_array = np.loadtxt(filename,skiprows=2,dtype=float)
-
-    e_a_coeffs = [] # energy absorption coefficients
-
-    for row in coeff_array:
-        e_a_coeffs.append([row[0],row[1]])
-    e_a_coeffs = np.array(e_a_coeffs)
     
-    # exponentially interpolate 
-    mu_energy = interpolate.interp1d(e_a_coeffs.T[0],e_a_coeffs.T[1],kind='nearest',fill_value='extrapolate')
-    mu = lambda energy, material: mu_energy(energy) # CHANGE THIS LATER TO A REAL FUNCTION
+    '''
     
     voxel_info = Siddon(num_planes,voxel_lengths,beam_coor,ini_planes)
     
@@ -316,10 +306,60 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     
     # DENSITY FUNCTION IS NOT REAL YET 
     for index in range(len(voxel_info)):
-        voxel_info[index]['TERMA'] = beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'])/density(voxel_info[index]['indices'])
         fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'])*voxel_info[index]['d'])
-    
+        voxel_info[index]['TERMA'] = beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'])/density(voxel_info[index]['indices'])
+        print(mu(beam_energy,voxel_info[index]['indices']))
+        
     return voxel_info 
+    
+
+def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,voxel_size_ratio):
+    '''
+    Parameters:
+    ----------
+    voxel_info :: list 
+      list of dictionaries each with keys 'd' (distance spent in voxel in cm), 'indices' (the (x,y,z) indices of the voxel),
+      and 'TERMA' (the total energy released per unit mass in that voxel)
+    
+    voxel_array :: numpy array 
+      contains all of the (x,y,z) coordinants of all of the voxels 
+    
+    kernel_func :: function 
+      interpolated kernel 
+    
+    center_coor :: tuple (3,3)
+      coordinates of the centre of the kernel
+    
+    voxel_size_ratio :: tuple (3)
+      (x,y,z) ratios of CT voxel size divided by kernel voxel size 
+    
+    Returns:
+    -------
+    energy_deposited :: numpy array
+      energy deposited from that specific voxel
+    
+    '''
+    
+    energy_deposited = []
+    kernel_value_total = 0
+    voxel_diff = ['','','']
+    
+    for n in range(len(voxel_array)):
+        voxel_diff[0] = voxel_array[n][0] - (voxel_info['indices'][0]-1)
+        voxel_diff[1] = voxel_array[n][1] - (voxel_info['indices'][1]-1)
+        voxel_diff[2] = voxel_array[n][2] - (voxel_info['indices'][2]-1)
+
+        kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*voxel_size_ratio[0],center_coor[1]+voxel_diff[1]*voxel_size_ratio[1],center_coor[2]+voxel_diff[2]*voxel_size_ratio[2]))
+        energy_deposited.append(kernel_value * voxel_info['TERMA'])
+        kernel_value_total += kernel_value
+    
+    # not 100% sure it needs to be a numpy array
+    energy_deposited = np.array(energy_deposited)
+    
+    if kernel_value_total != 0:
+        energy_deposited = energy_deposited/kernel_value_total
+    
+    return energy_deposited
 
 
 def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
@@ -339,16 +379,18 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
       distances between the x,y,z planes (also the lengths of the sides of the voxels) in cm
     
     voxel_info :: list 
-      list of dictionaries each with keys 'd' (distance spent in voxel in cm), 'indices' (the (x,y,z) indices of the voxel),
-      'fraction_lost' (the fraction of the initial number of photons lost in that voxel), and 'TERMA' (the TERMA) 
+      a list of a list of dictionaries each with keys 'd' (distance spent in voxel in cm), 
+      'indices' (the (x,y,z) indices of the voxel), and 'TERMA' (the TERMA).
+      each element of the initial list corresponds to a different ray
     
     Returns:
     -------
-    energy_deposit :: list 
-      list of dictionaries each with keys 'indices' (the (x,y,z) indices of the voxel) and 'energy' (the energy deposited in 
-      each voxel i.e. the dose) 
+    energy_deposit :: numpy array (Nx-1,Ny-1,Nz-1)
+      numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
+    num_cores = 4 # really unsure if core is the right word here 
+    
     Nx = num_planes[0]
     Ny = num_planes[1]
     Nz = num_planes[2]
@@ -390,33 +432,30 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
     
     # this is where I can lower size of data too 
     voxel_array = np.array([[x,y,z] for x in x_voxels for y in y_voxels for z in z_voxels])
-    
-    voxel_diff = ['','','']
-    
+        
     energy_deposit = []
+    
+    def mask_superimpose(voxel_information):
+        '''
+        masks Superimpose() so that it can be called by Pool
+        '''
+        return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,(dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size']))
+    
+    p = Pool(num_cores)
     
     for ray in range(len(voxel_info)):
         energy_deposit.append([])
-        count_voxel_inds = 0 
+        
+        intermediate_list = []
         for voxel_ind in range(len(voxel_info[ray])):
             if voxel_info[ray][voxel_ind]['d'] != 0:
-                kernel_value_total = 0
-                energy_deposit[ray].append([])
-                for n in range(len(voxel_array)):
-                    voxel_diff[0] = voxel_array[n][0] - (voxel_info[ray][voxel_ind]['indices'][0]-1)
-                    voxel_diff[1] = voxel_array[n][1] - (voxel_info[ray][voxel_ind]['indices'][1]-1)
-                    voxel_diff[2] = voxel_array[n][2] - (voxel_info[ray][voxel_ind]['indices'][2]-1)
-
-                    kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*dx/kernel_info['x']['voxel_size'],center_coor[1]+voxel_diff[1]*dy/kernel_info['y']['voxel_size'],center_coor[2]+voxel_diff[2]*dz/kernel_info['z']['voxel_size']))
-                    energy_deposit[ray][count_voxel_inds].append(kernel_value * voxel_info[ray][voxel_ind]['TERMA'])
-                    kernel_value_total += kernel_value
-
-                energy_deposit[ray][count_voxel_inds] = np.array(energy_deposit[ray][count_voxel_inds])
-
-                if kernel_value_total != 0:
-                    energy_deposit[ray][count_voxel_inds] = energy_deposit[ray][count_voxel_inds]/kernel_value_total
-                
-                count_voxel_inds += 1
+                intermediate_list.append(voxel_info[ray][voxel_ind])
+        
+        voxel_info[ray] = intermediate_list
+        
+        energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
+        
+        # energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind],voxel_array,kernel_func,center_coor,(dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size'])) for voxel_ind in range(len(voxel_info[ray]))]
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
     
@@ -437,8 +476,9 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     voxel_lengths :: tuple (3)
       distances between the x,y,z planes (also the lengths of the sides of the voxels) in cm
     
-    beam_coor :: tuple (3,2)
-      initial and final coordinates of the beam in the form ((x1,x2),(y1,y2),(z1,z2))
+    beam_coor :: list of tuples (3,2)
+      list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
+      list contains one tuple for each ray 
     
     ini_planes :: tuple (3)
       initial plane coordinates
@@ -464,9 +504,25 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
+    # making mu interpolation function
+    coeff_array = np.loadtxt(filename,skiprows=2,dtype=float)
+
+    e_a_coeffs = [] # energy absorption coefficients
+    
+    for row in coeff_array:
+        e_a_coeffs.append([row[0],row[1]])
+    e_a_coeffs = np.array(e_a_coeffs)
+    
+    # exponentially interpolate 
+    mu_energy = interpolate.interp1d(np.log(e_a_coeffs.T[0]),np.log(e_a_coeffs.T[1]),kind='linear',fill_value='extrapolate')
+    mu = lambda energy, material: np.exp(mu_energy(np.log(energy))) # CHANGE THIS LATER TO A REAL FUNCTION
+    
     voxel_info = []
+    
+    # interpolate mu from filename
+    
     for n in range(len(beam_coor)): 
-        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),filename))
+        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),mu))
     
     # I don't think I really need to do this anymore... but it kinda keeps it clean so idk
     # maybe take this out later
