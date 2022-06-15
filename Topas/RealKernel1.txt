@@ -1,8 +1,8 @@
 includeFile = KernelPhantom.txt
 
-i:Ge/Phantom/XBins = 100
-i:Ge/Phantom/YBins = 100
-i:Ge/Phantom/ZBins = 100
+i:Ge/Phantom/XBins = 99
+i:Ge/Phantom/YBins = 99
+i:Ge/Phantom/ZBins = 99
 s:Ge/Phantom/AssignToRegionNaMed = "targetregion"
 
 d:Interaction = 1. mm
@@ -11,7 +11,7 @@ s:Ge/BeamPosition/Parent="World"
 s:Ge/BeamPosition/Type="Group"
 d:Ge/BeamPosition/TransX=0. m
 d:Ge/BeamPosition/TransY=0. m
-d:Ge/BeamPosition/TransZ=0. m
+d:Ge/BeamPosition/TransZ=0.5 * Interaction mm
 d:Ge/BeamPosition/RotX=180. deg
 d:Ge/BeamPosition/RotY=0. deg
 d:Ge/BeamPosition/RotZ=0. deg
@@ -30,11 +30,11 @@ d:So/XRayBeam/BeamPositionCutoffY = 0.5 * Interaction mm
 d:So/XRayBeam/BeamPositionSpreadX = 0. cm
 d:So/XRayBeam/BeamPositionSpreadY = 0. cm
 s:So/XRayBeam/BeamAngularDistribution = "Flat" # Flat or Gaussian
-d:So/XRayBeam/BeamAngularCutoffX = 180. deg
-d:So/XRayBeam/BeamAngularCutoffY = 180. deg
+d:So/XRayBeam/BeamAngularCutoffX = 0.1 deg
+d:So/XRayBeam/BeamAngularCutoffY = 0.1 deg
 d:So/XRayBeam/BeamAngularSpreadX = 0.0 rad
 d:So/XRayBeam/BeamAngularSpreadY = 0.0 rad
-i:So/XRayBeam/NumberOfHistoriesInRun = 900000
+i:So/XRayBeam/NumberOfHistoriesInRun = 900000000
 i:So/XRayBeam/NumberOfHistoriesInRandomJob = 0 # do I need this?
 
 i:Ts/ShowHistoryCountAtInterval = 10000
@@ -53,5 +53,5 @@ s:Sc/RealKernel1/IfOutputFileAlreadyExists = "Overwrite"
 
 b:Vr/UseVarianceReduction = "True"
 s:Vr/ForcedInteraction/Type   = "ForcedInteraction"
-sv:Vr/ForcedInteraction/forregion/targetregion/processesNamed   = 8 "compt" "conv" "eBrem" "Rayl" "eIoni" "ePairProd" "CoulombScat" "msc"
-dv:Vr/ForcedInteraction/ForRegion/targetregion/ForcedDistances  = 8 Interaction Interaction Interaction Interaction Interaction Interaction Interaction Interaction mm
+sv:Vr/ForcedInteraction/forregion/targetregion/processesNamed   = 9 "compt" "phot" "conv" "eBrem" "Rayl" "eIoni" "ePairProd" "CoulombScat" "msc"
+dv:Vr/ForcedInteraction/ForRegion/targetregion/ForcedDistances  = 9 Interaction Interaction Interaction Interaction Interaction Interaction Interaction Interaction Interaction mm

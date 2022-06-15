@@ -13,7 +13,6 @@ d:Ge/BeamPosition/RotX=180. deg
 d:Ge/BeamPosition/RotY=0. deg
 d:Ge/BeamPosition/RotZ=0. deg
 
-# I'm not sure what the beam specifications should be 
 
 s:So/XRayBeam/Type = "Beam" # Beam, Isotropic, Emittance or PhaseSpace
 s:So/XRayBeam/Component = "BeamPosition"
@@ -22,10 +21,10 @@ d:So/XRayBeam/BeamEnergy = 120 keV
 u:So/XRayBeam/BeamEnergySpread = 0 # I don't know what this should be 
 s:So/XRayBeam/BeamPositionDistribution = "Flat" # Flat or Gaussian
 s:So/XRayBeam/BeamPositionCutoffShape = "Ellipse" # Point, Ellipse, Rectangle or Isotropic
-d:So/XRayBeam/BeamPositionCutoffX = 0.01 cm
-d:So/XRayBeam/BeamPositionCutoffY = 0.01 cm
-d:So/XRayBeam/BeamPositionSpreadX = 0.1 cm
-d:So/XRayBeam/BeamPositionSpreadY = 0.1 cm
+d:So/XRayBeam/BeamPositionCutoffX = 0.1 cm
+d:So/XRayBeam/BeamPositionCutoffY = 0.1 cm
+d:So/XRayBeam/BeamPositionSpreadX = 0.0 cm
+d:So/XRayBeam/BeamPositionSpreadY = 0.0 cm
 s:So/XRayBeam/BeamAngularDistribution = "Flat" # Flat or Gaussian
 d:So/XRayBeam/BeamAngularCutoffX = 0.1 deg
 d:So/XRayBeam/BeamAngularCutoffY = 0.1 deg
@@ -34,11 +33,11 @@ d:So/XRayBeam/BeamAngularSpreadY = 0.0 rad
 i:So/XRayBeam/NumberOfHistoriesInRun = 10000000
 i:So/XRayBeam/NumberOfHistoriesInRandomJob = 0 # do I need this?
 
-i:Ts/ShowHistoryCountAtInterval = 1000000
+i:Ts/ShowHistoryCountAtInterval = 100000
 #b:Ts/ShowCPUTime = "True"
 
-s:Sc/TestingDose1/Quantity = "DoseToMedium"
-s:Sc/TestingDose1/Component = "Phantom"
+s:Sc/EnergyDepositionTest/Quantity = "EnergyDeposit"
+s:Sc/EnergyDepositionTest/Component = "Phantom"
 
 #Ts/UseQt = "True"
 
@@ -46,4 +45,4 @@ s:Sc/TestingDose1/Component = "Phantom"
 #b:Gr/ViewA/IncludeAxes = "False"
 #d:Gr/ViewA/AxesSize = 1. m
 
-s:Sc/TestingDose1/IfOutputFileAlreadyExists = "Overwrite"
+s:Sc/EnergyDepositionTest/IfOutputFileAlreadyExists = "Overwrite"

@@ -1,0 +1,22 @@
+includeFile = WaterPhantom.txt
+
+i:Ge/Phantom/XBins = 6
+i:Ge/Phantom/YBins = 7
+i:Ge/Phantom/ZBins = 8
+
+i:So/Demo/NumberOfHistoriesInRun = 100
+s:So/Demo/BeamParticle = "gamma"
+d:So/Demo/BeamEnergy = 225 keV
+
+s:Sc/pytest/Quantity = "EnergyDeposit"
+s:Sc/pytest/Component = "Phantom"
+
+Ts/UseQt = "True"
+
+s:Gr/ViewA/Type = "OpenGL"
+b:Gr/ViewA/IncludeAxes = "True"
+d:Gr/ViewA/AxesSize = 1. m
+
+s:Sc/KernelScorer/IfOutputFileAlreadyExists = "Overwrite"
+
+b:Ph/ListProcesses = "True"

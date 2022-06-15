@@ -1,0 +1,41 @@
+# just a lil ol box hopefully with a beam???
+
+d:Ge/World/HLX = 10. cm
+d:Ge/World/HLY = 10. cm
+d:Ge/World/HLZ = 10. cm
+
+s:Ge/MyGroup/Type    = "Group"
+s:Ge/MyGroup/Parent = "World"
+dc:Ge/MyGroup/RotX   = 0. deg
+d:Ge/MyGroup/RotY   = 0. deg
+d:Ge/MyGroup/RotZ   = 0. deg
+
+s:Ge/Box/Material = "G4_WATER"
+d:Ge/Box/HLX = 3. mm
+d:Ge/Box/HLY = 5. mm
+d:Ge/Box/HLZ = 2. cm
+s:Ge/Box/Parent = "MyGroup"
+s:Ge/Box/Type = "TsBox"
+d:Ge/Box/TransX = -3.5 cm
+
+s:Ge/Shooter/Material = "Nickel"
+d:Ge/Shooter/HLX = 0.5 cm
+d:Ge/Shooter/HLY = 0.5 cm
+d:Ge/Shooter/HLZ = 0.5 cm
+s:Ge/Shooter/Parent = "MyGroup"
+s:Ge/Shooter/Type = "TsBox"
+d:Ge/Shooter/TransX = 6. cm
+
+s:Gr/ViewA/Type = "OpenGL"
+b:Gr/ViewA/IncludeAxes = "True"
+d:Gr/ViewA/AxesSize = 15. cm
+u:Gr/ViewA/Zoom = 1
+
+s:So/MySource/BeamParticle = "proton"
+d:So/MySource/BeamEnergy = 200. MeV
+i:So/MySource/NumberOfHistoriesInRun = 100
+s:So/MySource/BeamEnergySpectrumType = "Continuous"
+dv:So/MySource/BeamEnergySpectrumValues = 3 50. 100. 150. MeV
+uv:So/MySource/BeamEnergySpectrumWeights = 3 .20 .60 .20
+
+Ts/UseQt = "True"

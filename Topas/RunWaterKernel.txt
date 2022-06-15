@@ -1,10 +1,12 @@
 includeFile = RealKernel1.txt
 
-i:Ge/Phantom/XBins = 100
-i:Ge/Phantom/YBins = 100
-i:Ge/Phantom/ZBins = 100
+i:Ge/Phantom/XBins = 99
+i:Ge/Phantom/YBins = 99
+i:Ge/Phantom/ZBins = 99
 
-d:Interaction = 1. mm
+d:Interaction = 0.1 cm
+
+d:Ge/BeamPosition/TransZ=0.5 * Interaction mm
 
 d:So/XRayBeam/BeamEnergy = 120 keV
 s:So/XRayBeam/BeamPositionDistribution = "Flat" # Flat or Gaussian
@@ -14,9 +16,9 @@ d:So/XRayBeam/BeamPositionCutoffY = 0.5 * Interaction mm
 d:So/XRayBeam/BeamPositionSpreadX = 0. cm
 d:So/XRayBeam/BeamPositionSpreadY = 0. cm
 s:So/XRayBeam/BeamAngularDistribution = "Flat" # Flat or Gaussian
-d:So/XRayBeam/BeamAngularCutoffX = 180. deg
-d:So/XRayBeam/BeamAngularCutoffY = 180. deg
+d:So/XRayBeam/BeamAngularCutoffX = 0.1 deg
+d:So/XRayBeam/BeamAngularCutoffY = 0.1 deg
 d:So/XRayBeam/BeamAngularSpreadX = 0.0 rad
 d:So/XRayBeam/BeamAngularSpreadY = 0.0 rad
 
-i:So/XRayBeam/NumberOfHistoriesInRun = 900000
+i:So/XRayBeam/NumberOfHistoriesInRun = 90000000
