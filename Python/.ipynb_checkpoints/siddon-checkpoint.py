@@ -4,6 +4,7 @@ from mpl_toolkits import mplot3d
 from scipy import interpolate
 from topas2numpy import BinnedResult
 from multiprocessing import Pool
+import pickle
 
 def alpha_func(plane,coor1,coor2):
     '''
@@ -260,7 +261,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     
     return(voxel_info)
 
-def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,mu):
+def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,mu_l,mu_m):
     '''
     Parameters:
     ----------
@@ -276,14 +277,17 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     ini_planes :: tuple (3)
       initial plane coordinates
     
-    beam_energy :: float 
-      the energy of the beam in MeV
+    beam_energy :: numpy array
+      vector containing the the beam energies in MeV (corresponding to ini_fluence)
     
-    ini_fluence :: float
-      the initial photon fluence in cm^-2
+    ini_fluence :: numpy array
+      vector containig the initial photon fluences in cm^-2 (corresponding to beam_energy)
     
-    mu :: function
-      function that takes energy and material as arguments and returns energy absorption coefficient
+    mu_l :: function
+      function that takes energy and material as arguments and returns linear energy absorption coefficient
+    
+    mu_m :: function
+      function that takes energy and material as arguments and returns mass energy absorption coefficient
     
     Returns:
     -------
@@ -295,22 +299,21 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     
     voxel_info = Siddon(num_planes,voxel_lengths,beam_coor,ini_planes)
     
-    # fraction = 1
-    # for index in range(len(voxel_info)):
-    #     fraction_lost = fraction - fraction*np.exp(-mu(ini_energy,voxel_info[index]['indices'])*voxel_info[index]['d'])
-    #     voxel_info[index]['fraction_lost'] = fraction_lost
-    #     fraction = fraction - fraction_lost
-    
     # this is photon fluence not energy fluence
     fluence = ini_fluence
     
     # DENSITY FUNCTION IS NOT REAL YET 
+    # this is also calculating TERMA at the end of each voxel not the middle 
+    intermediate_list = []
     for index in range(len(voxel_info)):
-        fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'])*voxel_info[index]['d'])
-        voxel_info[index]['TERMA'] = beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'])/density(voxel_info[index]['indices'])
-        print(mu(beam_energy,voxel_info[index]['indices']))
-        
-    return voxel_info 
+        if voxel_info[index]['d'] != 0:
+            voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu_m(beam_energy,voxel_info[index]['indices'])/density(voxel_info[index]['indices']))
+            intermediate_list.append(voxel_info[index])
+            fluence = fluence*np.exp(-mu_l(beam_energy,voxel_info[index]['indices'])*voxel_info[index]['d'])
+
+    voxel_info = intermediate_list
+    
+    return voxel_info
     
 
 def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,voxel_size_ratio):
@@ -361,8 +364,18 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,voxel_size_ratio)
     
     return energy_deposited
 
+def mask_superimpose(voxel_information):
+    '''
+    masks Superimpose() so that it can be called by Pool
+    '''
+    voxel_array = pickle.load(open('dose_calc_variables/voxel_array.pickle','rb'))
+    kernel_func = pickle.load(open('dose_calc_variables/kernel_func.pickle','rb'))
+    center_coor = pickle.load(open('dose_calc_variables/center_coor.pickle','rb'))
+    voxel_size_ratio = pickle.load(open('dose_calc_variables/voxel_size_ratio.pickle','rb'))
+    
+    return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,voxel_size_ratio)
 
-def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
+def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,num_cores):
     '''
     Parameters:
     ----------
@@ -383,13 +396,16 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
       'indices' (the (x,y,z) indices of the voxel), and 'TERMA' (the TERMA).
       each element of the initial list corresponds to a different ray
     
+    num_cores :: integer 
+      number of cores to use 
+    
     Returns:
     -------
     energy_deposit :: numpy array (Nx-1,Ny-1,Nz-1)
       numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
-    num_cores = 4 # really unsure if core is the right word here 
+    # num_cores = 8 # really unsure if core is the right word here 
     
     Nx = num_planes[0]
     Ny = num_planes[1]
@@ -435,23 +451,15 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
         
     energy_deposit = []
     
-    def mask_superimpose(voxel_information):
-        '''
-        masks Superimpose() so that it can be called by Pool
-        '''
-        return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,(dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size']))
+    pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
+    pickle.dump(kernel_func,open('dose_calc_variables/kernel_func.pickle','wb'))
+    pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
+    pickle.dump((dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size']),open('dose_calc_variables/voxel_size_ratio.pickle','wb'))
     
     p = Pool(num_cores)
     
     for ray in range(len(voxel_info)):
         energy_deposit.append([])
-        
-        intermediate_list = []
-        for voxel_ind in range(len(voxel_info[ray])):
-            if voxel_info[ray][voxel_ind]['d'] != 0:
-                intermediate_list.append(voxel_info[ray][voxel_ind])
-        
-        voxel_info[ray] = intermediate_list
         
         energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
         
@@ -459,14 +467,15 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info):
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
     
+    p.close()
+    
     energy_deposit = np.array(sum(energy_deposit))
     energy_deposit = energy_deposit.reshape(Nx-1,Ny-1,Nz-1)
     
     return energy_deposit
     
     
-
-def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename,kernelname,kernel_size):
+def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename,kernelname,kernel_size,num_cores):
     '''
     Parameters:
     ----------
@@ -498,6 +507,9 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     kernel_size :: tuple (3)
       (x,y,z) dimensions of the kernel in cm 
     
+    num_cores :: integer 
+      number of cores to use 
+    
     Returns:
     -------
     energy_deposit :: numpy array (Nx-1,Ny-1,Nz-1)
@@ -506,28 +518,26 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     '''
     # making mu interpolation function
     coeff_array = np.loadtxt(filename,skiprows=2,dtype=float)
-
-    e_a_coeffs = [] # energy absorption coefficients
-    
-    for row in coeff_array:
-        e_a_coeffs.append([row[0],row[1]])
-    e_a_coeffs = np.array(e_a_coeffs)
     
     # exponentially interpolate 
-    mu_energy = interpolate.interp1d(np.log(e_a_coeffs.T[0]),np.log(e_a_coeffs.T[1]),kind='linear',fill_value='extrapolate')
-    mu = lambda energy, material: np.exp(mu_energy(np.log(energy))) # CHANGE THIS LATER TO A REAL FUNCTION
+    mu_linear = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
+    mu_l = lambda energy, material: np.exp(mu_linear(np.log(energy))) # CHANGE THIS LATER TO A REAL FUNCTION
+
+    mu_mass = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
+    mu_m = lambda energy, material: np.exp(mu_mass(np.log(energy))) # CHANGE THIS LATER TO A REAL FUNCTION
     
     voxel_info = []
     
-    # interpolate mu from filename
+    beam_energy = np.array(beam_energy)
+    ini_fluence = np.array(ini_fluence)
     
     for n in range(len(beam_coor)): 
-        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),mu))
+        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),mu_l,mu_m))
     
     # I don't think I really need to do this anymore... but it kinda keeps it clean so idk
     # maybe take this out later
     kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
     kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
     
-    energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info)
+    energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,num_cores)
     return energy_deposit
