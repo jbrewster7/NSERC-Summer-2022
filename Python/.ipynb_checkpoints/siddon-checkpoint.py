@@ -293,7 +293,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     -------
     voxel_info :: list 
       list of dictionaries each with keys 'd' (distance spent in voxel in cm), 'indices' (the (x,y,z) indices of the voxel),
-      and 'TERMA' (the total energy released per unit mass in that voxel)
+      and 'TERMA' (the total energy released per unit mass in that voxel) in MeV/g
     
     '''
     
@@ -331,7 +331,7 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,voxel_size_ratio)
       interpolated kernel 
     
     center_coor :: tuple (3,3)
-      coordinates of the centre of the kernel
+      coordinates of the center of the kernel
     
     voxel_size_ratio :: tuple (3)
       (x,y,z) ratios of CT voxel size divided by kernel voxel size 
@@ -405,7 +405,6 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,n
       numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
-    # num_cores = 8 # really unsure if core is the right word here 
     
     Nx = num_planes[0]
     Ny = num_planes[1]
