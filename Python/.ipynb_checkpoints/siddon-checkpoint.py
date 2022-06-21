@@ -306,9 +306,9 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     intermediate_list = []
     for index in range(len(voxel_info)):
         if voxel_info[index]['d'] != 0:
-            voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m')/density(voxel_info[index]['indices']))
+            voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m'))
             intermediate_list.append(voxel_info[index])
-            fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
+            fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*density(voxel_info[index]['indices'])*voxel_info[index]['d'])
 
     voxel_info = intermediate_list
     
