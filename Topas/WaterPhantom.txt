@@ -4,9 +4,9 @@ d:Ge/World/HLY = 8. cm
 d:Ge/World/HLZ = 8. cm
 
 s:Ge/Phantom/Material = "G4_WATER"
-d:Ge/Phantom/HLX = 5. cm
-d:Ge/Phantom/HLY = 5. cm
-d:Ge/Phantom/HLZ = 5. cm
+d:Ge/Phantom/HLX = 2.5 cm
+d:Ge/Phantom/HLY = 2.5 cm
+d:Ge/Phantom/HLZ = 2.5 cm
 s:Ge/Phantom/Parent = "World"
 s:Ge/Phantom/Type = "TsBox"
 d:Ge/Phantom/TransX = 0. m
