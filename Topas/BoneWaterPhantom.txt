@@ -1,0 +1,34 @@
+s:Ge/World/Material = "Vacuum"
+d:Ge/World/HLX = 8. cm
+d:Ge/World/HLY = 8. cm
+d:Ge/World/HLZ = 8. cm
+
+s:Ge/Phantom/Material = "Vacuum"
+d:Ge/Phantom/HLX = 2.5 cm
+d:Ge/Phantom/HLY = 2.5 cm
+d:Ge/Phantom/HLZ = 2.5 cm
+s:Ge/Phantom/Parent = "World"
+s:Ge/Phantom/Type = "TsBox"
+d:Ge/Phantom/TransX = 0. m
+d:Ge/Phantom/TransY = 0. m
+d:Ge/Phantom/TransZ = 0. m
+
+s:Ge/Water/Material = "G4_WATER"
+d:Ge/Water/HLX = 2.5 cm
+d:Ge/Water/HLY = 2.5 cm
+d:Ge/Water/HLZ = 1.25 cm
+s:Ge/Water/Parent = "Phantom"
+s:Ge/Water/Type = "TsBox"
+d:Ge/Water/TransX = 0. cm
+d:Ge/Water/TransY = 0. cm
+d:Ge/Water/TransZ = 1.25 cm
+
+s:Ge/Bone/Material = "G4_BONE_CORTICAL_ICRP"
+d:Ge/Bone/HLX = 2.5 cm
+d:Ge/Bone/HLY = 2.5 cm
+d:Ge/Bone/HLZ = 1.25 cm
+s:Ge/Bone/Parent = "Phantom"
+s:Ge/Bone/Type = "TsBox"
+d:Ge/Bone/TransX = 0. m
+d:Ge/Bone/TransY = 0. m
+d:Ge/Bone/TransZ = -1.25 cm

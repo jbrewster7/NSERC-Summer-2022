@@ -1,0 +1,14 @@
+s:Ge/World/Material = "Vacuum"
+d:Ge/World/HLX = 4. cm
+d:Ge/World/HLY = 4. cm
+d:Ge/World/HLZ = 4. cm
+
+s:Ge/Phantom/Material = "G4_BONE_CORTICAL_ICRP"
+d:Ge/Phantom/HLX = 1. cm
+d:Ge/Phantom/HLY = 1. cm
+d:Ge/Phantom/HLZ = 1. cm
+s:Ge/Phantom/Parent = "World"
+s:Ge/Phantom/Type = "TsBox"
+d:Ge/Phantom/TransX = 0. m
+d:Ge/Phantom/TransY = 0. m
+d:Ge/Phantom/TransZ = 0. m
