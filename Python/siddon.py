@@ -153,6 +153,7 @@ def density(index):
     '''
     
     return 1
+    
 
 def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     '''
@@ -261,7 +262,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     
     return(voxel_info)
 
-def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,mu_l,mu_m):
+def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,mu):
     '''
     Parameters:
     ----------
@@ -283,11 +284,9 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     ini_fluence :: numpy array
       vector containig the initial photon fluences in cm^-2 (corresponding to beam_energy)
     
-    mu_l :: function
-      function that takes energy and material as arguments and returns linear energy absorption coefficient
-    
-    mu_m :: function
-      function that takes energy and material as arguments and returns mass energy absorption coefficient
+    mu :: function
+      function that takes energy and material as arguments and returns either mass or linear energy absorption coefficient,
+      depending on specified parameters
     
     Returns:
     -------
@@ -307,9 +306,9 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     intermediate_list = []
     for index in range(len(voxel_info)):
         if voxel_info[index]['d'] != 0:
-            voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu_m(beam_energy,voxel_info[index]['indices'])/density(voxel_info[index]['indices']))
+            voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m')/density(voxel_info[index]['indices']))
             intermediate_list.append(voxel_info[index])
-            fluence = fluence*np.exp(-mu_l(beam_energy,voxel_info[index]['indices'])*voxel_info[index]['d'])
+            fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
 
     voxel_info = intermediate_list
     
@@ -517,13 +516,37 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     '''
     # making mu interpolation function
     coeff_array = np.loadtxt(filename,skiprows=2,dtype=float)
-    
-    # exponentially interpolate 
     mu_linear = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
-    mu_l = lambda energy, material: np.exp(mu_linear(np.log(energy))) # CHANGE THIS LATER TO A REAL FUNCTION
-
     mu_mass = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
-    mu_m = lambda energy, material: np.exp(mu_mass(np.log(energy))) # CHANGE THIS LATER TO A REAL FUNCTION
+    
+    def mu(energy,voxel_index,kind):
+        '''
+        This is currently only set-up for water, will update later.
+
+        Parameters:
+        ----------
+        energy :: numpy array or float
+          energy of the beam 
+
+        voxel_index :: tuple (3)
+          (x,y,z) coordinates of the voxel 
+
+        kind :: str 
+          type of absorption coefficient ('l' for linear and 'm' for mass-energy)
+
+        Returns:
+        -------
+        absorption_coefficient :: float 
+          linear or mass energy absorption coefficient
+
+        '''
+        # exponentially interpolate 
+        if kind == 'l':
+            return np.exp(mu_linear(np.log(energy))) 
+        elif kind == 'm':
+            return np.exp(mu_mass(np.log(energy))) 
+        else:
+            raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
     
     voxel_info = []
     
@@ -531,7 +554,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     ini_fluence = np.array(ini_fluence)
     
     for n in range(len(beam_coor)): 
-        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),mu_l,mu_m))
+        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),mu))
     
     # I don't think I really need to do this anymore... but it kinda keeps it clean so idk
     # maybe take this out later
