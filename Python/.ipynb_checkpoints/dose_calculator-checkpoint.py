@@ -5,6 +5,7 @@ from scipy import interpolate
 from topas2numpy import BinnedResult
 from multiprocessing import Pool
 import pickle
+from numpy import linalg
 
 def alpha_func(plane,coor1,coor2):
     '''
@@ -315,7 +316,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     return voxel_info
     
 
-def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,voxel_size_ratio):
+def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat):
     '''
     Parameters:
     ----------
@@ -332,8 +333,8 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,voxel_size_ratio)
     center_coor :: tuple (3,3)
       coordinates of the center of the kernel
     
-    voxel_size_ratio :: tuple (3)
-      (x,y,z) ratios of CT voxel size divided by kernel voxel size 
+    kernel_coors_mat :: list of numpy arrays
+      change of coordinates matrix from CT array coordinates to kernel coordinates
     
     Returns:
     -------
@@ -350,8 +351,10 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,voxel_size_ratio)
         voxel_diff[0] = voxel_array[n][0] - (voxel_info['indices'][0]-1)
         voxel_diff[1] = voxel_array[n][1] - (voxel_info['indices'][1]-1)
         voxel_diff[2] = voxel_array[n][2] - (voxel_info['indices'][2]-1)
-
-        kernel_value = kernel_func((center_coor[0]+voxel_diff[0]*voxel_size_ratio[0],center_coor[1]+voxel_diff[1]*voxel_size_ratio[1],center_coor[2]+voxel_diff[2]*voxel_size_ratio[2]))
+        
+        kernel_diff = kernel_coors_mat.dot(voxel_diff)
+        
+        kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
         energy_deposited.append(kernel_value * voxel_info['TERMA'])
         kernel_value_total += kernel_value
     
@@ -370,11 +373,11 @@ def mask_superimpose(voxel_information):
     voxel_array = pickle.load(open('dose_calc_variables/voxel_array.pickle','rb'))
     kernel_func = pickle.load(open('dose_calc_variables/kernel_func.pickle','rb'))
     center_coor = pickle.load(open('dose_calc_variables/center_coor.pickle','rb'))
-    voxel_size_ratio = pickle.load(open('dose_calc_variables/voxel_size_ratio.pickle','rb'))
+    kernel_coors_mat = pickle.load(open('dose_calc_variables/kernel_coors_mat.pickle','rb'))
     
-    return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,voxel_size_ratio)
+    return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,kernel_coors_mat)
 
-def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,num_cores):
+def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,num_cores):
     '''
     Parameters:
     ----------
@@ -449,15 +452,29 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,n
         
     energy_deposit = []
     
+    CT_basis = np.matrix([[dx,0,0],[0,dy,0],[0,0,-dz]])
+    
     pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
     pickle.dump(kernel_func,open('dose_calc_variables/kernel_func.pickle','wb'))
     pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
-    pickle.dump((dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size']),open('dose_calc_variables/voxel_size_ratio.pickle','wb'))
     
     p = Pool(num_cores)
     
     for ray in range(len(voxel_info)):
         energy_deposit.append([])
+        delta_x = beam_coor[ray][0][1]-beam_coor[ray][0][0]
+        delta_y = beam_coor[ray][1][1]-beam_coor[ray][1][0]
+        delta_z = beam_coor[ray][2][1]-beam_coor[ray][2][0]
+        mag = np.sqrt(delta_x**2+delta_y**2+delta_z**2)
+        kernel_basis = np.array([[[kernel_info['x']['voxel_size']*delta_z/mag],[kernel_info['x']['voxel_size']*delta_y/mag],[kernel_info['x']['voxel_size']*delta_x*(-1)/mag]],
+                                  [[kernel_info['y']['voxel_size']*delta_x/mag],[kernel_info['y']['voxel_size']*delta_z/mag],[kernel_info['y']['voxel_size']*delta_y*(-1)/mag]],
+                                  [[kernel_info['z']['voxel_size']*delta_x/mag],[kernel_info['z']['voxel_size']*delta_y/mag],[kernel_info['z']['voxel_size']*delta_z/mag]]])
+        kernel_coors_mat = []
+        for vec in CT_basis:
+            kernel_coors_mat.append(linalg.solve(kernel_basis.T,vec))
+        kernel_coors_mat = np.array(kernel_coors_mat).T
+        
+        pickle.dump(kernel_coors_mat,open('dose_calc_variables/kernel_coors_mat.pickle','wb'))
         
         energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
         
@@ -504,6 +521,10 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     kernel_size :: tuple (3)
       (x,y,z) dimensions of the kernel in cm 
+    
+    beam_coor :: list of tuples (3,2)
+      list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
+      list contains one tuple for each ray 
     
     num_cores :: integer 
       number of cores to use 
@@ -561,5 +582,5 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
     kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
     
-    energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,num_cores)
+    energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,num_cores)
     return energy_deposit
