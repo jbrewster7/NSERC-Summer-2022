@@ -34,7 +34,7 @@ d:So/XRayBeam/BeamAngularCutoffX = 0.1 deg
 d:So/XRayBeam/BeamAngularCutoffY = 0.1 deg
 d:So/XRayBeam/BeamAngularSpreadX = 0.0 rad
 d:So/XRayBeam/BeamAngularSpreadY = 0.0 rad
-i:So/XRayBeam/NumberOfHistoriesInRun = 900000000
+i:So/XRayBeam/NumberOfHistoriesInRun = 9
 i:So/XRayBeam/NumberOfHistoriesInRandomJob = 0 # do I need this?
 
 i:Ts/ShowHistoryCountAtInterval = 10000
@@ -46,8 +46,8 @@ s:Sc/RealKernel1/Component = "Phantom"
 #Ts/UseQt = "True"
 
 #s:Gr/ViewA/Type = "OpenGL"
-#b:Gr/ViewA/IncludeAxes = "False"
-#d:Gr/ViewA/AxesSize = 1. m
+#b:Gr/ViewA/IncludeAxes = "True"
+#d:Gr/ViewA/AxesSize = 1. cm
 
 s:Sc/RealKernel1/IfOutputFileAlreadyExists = "Overwrite"
 

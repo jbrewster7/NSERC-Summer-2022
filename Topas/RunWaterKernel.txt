@@ -4,9 +4,9 @@ i:Ge/Phantom/XBins = 99
 i:Ge/Phantom/YBins = 99
 i:Ge/Phantom/ZBins = 99
 
-d:Interaction = 0.1 cm
+d:Interaction = 0.05 cm
 
-d:Ge/BeamPosition/TransZ=0.125 * Interaction mm
+d:Ge/BeamPosition/TransZ=-0.5 * Interaction mm
 
 d:So/XRayBeam/BeamEnergy = 120 keV
 s:So/XRayBeam/BeamPositionDistribution = "Flat" # Flat or Gaussian
@@ -21,4 +21,7 @@ d:So/XRayBeam/BeamAngularCutoffY = 0.1 deg
 d:So/XRayBeam/BeamAngularSpreadX = 0.0 rad
 d:So/XRayBeam/BeamAngularSpreadY = 0.0 rad
 
-i:So/XRayBeam/NumberOfHistoriesInRun = 9000000
+i:So/XRayBeam/NumberOfHistoriesInRun = 900000
+
+d:Ge/BeamPosition/RotX=0. deg
+
