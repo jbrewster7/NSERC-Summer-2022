@@ -596,3 +596,44 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,num_cores)
     return energy_deposit
+
+def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
+    '''
+    Makes the rays for a fan beam. 
+    
+    Parameters:
+    ----------
+    num_rays :: int 
+      number of rays to make from the center (radius if ellipse and number in square grid)
+    
+    angle_spread :: tuple (3)
+      angle of farthest spread in the specified coordinate in degrees
+    
+    beam_coor :: tuple (3,2)
+      initial and final coordinates of the center of the beam in the form ((x1,x2),(y1,y2),(z1,z2))
+    
+    direction :: str 
+      direction of the spread, is either 'x' or 'y'
+    
+    adjust :: float
+      how far from the center ray to double the rays so that beam isn't falling in the middle of two voxels
+    
+    Returns:
+    -------
+    beam_coors :: list of tuples (3,2)
+      list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
+      list contains one tuple for each ray
+    
+    '''
+    delta_z = beam_coor[2][1] - beam_coor[2][0]
+    
+    if direction == 'x':
+        phi = np.arctan((beam_coor[0][1] - beam_coor[0][0])/delta_z)
+        beam_coors = [((beam_coor[0][0],beam_coor[0][0]+np.tan(theta+phi)),(beam_coor[1][0]+adjust,beam_coor[1][1]+adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]+[((beam_coor[0][0],beam_coor[0][0]+np.tan(theta+phi)),(beam_coor[1][0]-adjust,beam_coor[1][1]-adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]
+    elif direction == 'y':
+        phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
+        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]
+    else:
+        raise ValueError('direction variable must be \'x\' or \'y\'')
+    
+    return beam_coors

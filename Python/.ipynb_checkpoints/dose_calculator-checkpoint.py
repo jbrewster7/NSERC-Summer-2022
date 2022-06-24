@@ -452,7 +452,8 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
         
     energy_deposit = []
     
-    CT_basis = np.matrix([[dx,0,0],[0,dy,0],[0,0,-dz]])
+    CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,-dz]])
+    pre_rotated_ker = np.array([[kernel_info['x']['voxel_size'],0,0],[0,kernel_info['y']['voxel_size'],0],[0,0,kernel_info['z']['voxel_size']]])
     
     pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
     pickle.dump(kernel_func,open('dose_calc_variables/kernel_func.pickle','wb'))
@@ -465,10 +466,21 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
         delta_x = beam_coor[ray][0][1]-beam_coor[ray][0][0]
         delta_y = beam_coor[ray][1][1]-beam_coor[ray][1][0]
         delta_z = beam_coor[ray][2][1]-beam_coor[ray][2][0]
-        mag = np.sqrt(delta_x**2+delta_y**2+delta_z**2)
-        kernel_basis = np.array([[[kernel_info['x']['voxel_size']*delta_z/mag],[kernel_info['x']['voxel_size']*delta_y/mag],[kernel_info['x']['voxel_size']*delta_x*(-1)/mag]],
-                                  [[kernel_info['y']['voxel_size']*delta_x/mag],[kernel_info['y']['voxel_size']*delta_z/mag],[kernel_info['y']['voxel_size']*delta_y*(-1)/mag]],
-                                  [[kernel_info['z']['voxel_size']*delta_x/mag],[kernel_info['z']['voxel_size']*delta_y/mag],[kernel_info['z']['voxel_size']*delta_z/mag]]])
+        
+        if delta_x == 0 and delta_y == 0 and delta_z == 0:
+            raise ValueError('Beam cannot have magnitude of 0.')
+        elif delta_x == 0 and delta_y == 0:
+            kernel_basis = pre_rotated_ker
+        elif delta_z == 0 and delta_x == 0:
+            kernel_basis = np.array([pre_rotated_ker[0],-pre_rotated_ker[2],pre_rotated_ker[1]])
+        elif delta_z == 0 and delta_y == 0:
+            kernel_basis = np.array([-pre_rotated_ker[2],pre_rotated_ker[1],pre_rotated_ker[0]])
+        else:
+            Rx = np.array([[1,0,0],[0,delta_z/np.sqrt(delta_y**2+delta_z**2),-delta_y/np.sqrt(delta_y**2+delta_z**2)],[0,delta_y/np.sqrt(delta_y**2+delta_z**2),delta_z/np.sqrt(delta_y**2+delta_z**2)]])
+            Ry = np.array([[delta_x/np.sqrt(delta_x**2+delta_z**2),0,delta_z/np.sqrt(delta_x**2+delta_z**2)],[0,1,0],[-delta_z/np.sqrt(delta_x**2+delta_z**2),0,delta_x/np.sqrt(delta_x**2+delta_z**2)]])
+            Rz = np.array([[delta_x/np.sqrt(delta_x**2+delta_y**2),-delta_y/np.sqrt(delta_x**2+delta_y**2),0],[delta_y/np.sqrt(delta_x**2+delta_y**2),delta_x/np.sqrt(delta_x**2+delta_y**2),0],[0,0,1]])
+            kernel_basis = np.array([Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[0]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[1]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[2])))])
+        
         kernel_coors_mat = []
         for vec in CT_basis:
             kernel_coors_mat.append(linalg.solve(kernel_basis.T,vec))
@@ -584,3 +596,44 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,num_cores)
     return energy_deposit
+
+def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
+    '''
+    Makes the rays for a fan beam. 
+    
+    Parameters:
+    ----------
+    num_rays :: int 
+      number of rays to make from the center (radius if ellipse and number in square grid)
+    
+    angle_spread :: tuple (3)
+      angle of farthest spread in the specified coordinate in degrees
+    
+    beam_coor :: tuple (3,2)
+      initial and final coordinates of the center of the beam in the form ((x1,x2),(y1,y2),(z1,z2))
+    
+    direction :: str 
+      direction of the spread, is either 'x' or 'y'
+    
+    adjust :: float
+      how far from the center ray to double the rays so that beam isn't falling in the middle of two voxels
+    
+    Returns:
+    -------
+    beam_coors :: list of tuples (3,2)
+      list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
+      list contains one tuple for each ray
+    
+    '''
+    delta_z = beam_coor[2][1] - beam_coor[2][0]
+    
+    if direction == 'x':
+        phi = np.arctan((beam_coor[0][1] - beam_coor[0][0])/delta_z)
+        beam_coors = [((beam_coor[0][0],beam_coor[0][0]+np.tan(theta+phi)),(beam_coor[1][0]+adjust,beam_coor[1][1]+adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]+[((beam_coor[0][0],beam_coor[0][0]+np.tan(theta+phi)),(beam_coor[1][0]-adjust,beam_coor[1][1]-adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]
+    elif direction == 'y':
+        phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
+        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]
+    else:
+        raise ValueError('direction variable must be \'x\' or \'y\'')
+    
+    return beam_coors
