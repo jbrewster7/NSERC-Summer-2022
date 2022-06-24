@@ -452,7 +452,8 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
         
     energy_deposit = []
     
-    CT_basis = np.matrix([[dx,0,0],[0,dy,0],[0,0,-dz]])
+    CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,-dz]])
+    pre_rotated_ker = np.array([[kernel_info['x']['voxel_size'],0,0],[0,kernel_info['y']['voxel_size'],0],[0,0,kernel_info['z']['voxel_size']]])
     
     pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
     pickle.dump(kernel_func,open('dose_calc_variables/kernel_func.pickle','wb'))
@@ -465,10 +466,21 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
         delta_x = beam_coor[ray][0][1]-beam_coor[ray][0][0]
         delta_y = beam_coor[ray][1][1]-beam_coor[ray][1][0]
         delta_z = beam_coor[ray][2][1]-beam_coor[ray][2][0]
-        mag = np.sqrt(delta_x**2+delta_y**2+delta_z**2)
-        kernel_basis = np.array([[[kernel_info['x']['voxel_size']*delta_z/mag],[kernel_info['x']['voxel_size']*delta_y/mag],[kernel_info['x']['voxel_size']*delta_x*(-1)/mag]],
-                                  [[kernel_info['y']['voxel_size']*delta_x/mag],[kernel_info['y']['voxel_size']*delta_z/mag],[kernel_info['y']['voxel_size']*delta_y*(-1)/mag]],
-                                  [[kernel_info['z']['voxel_size']*delta_x/mag],[kernel_info['z']['voxel_size']*delta_y/mag],[kernel_info['z']['voxel_size']*delta_z/mag]]])
+        
+        if delta_x == 0 and delta_y == 0 and delta_z == 0:
+            raise ValueError('Beam cannot have magnitude of 0.')
+        elif delta_x == 0 and delta_y == 0:
+            kernel_basis = pre_rotated_ker
+        elif delta_z == 0 and delta_x == 0:
+            kernel_basis = np.array([pre_rotated_ker[0],-pre_rotated_ker[2],pre_rotated_ker[1]])
+        elif delta_z == 0 and delta_y == 0:
+            kernel_basis = np.array([-pre_rotated_ker[2],pre_rotated_ker[1],pre_rotated_ker[0]])
+        else:
+            Rx = np.array([[1,0,0],[0,delta_z/np.sqrt(delta_y**2+delta_z**2),-delta_y/np.sqrt(delta_y**2+delta_z**2)],[0,delta_y/np.sqrt(delta_y**2+delta_z**2),delta_z/np.sqrt(delta_y**2+delta_z**2)]])
+            Ry = np.array([[delta_x/np.sqrt(delta_x**2+delta_z**2),0,delta_z/np.sqrt(delta_x**2+delta_z**2)],[0,1,0],[-delta_z/np.sqrt(delta_x**2+delta_z**2),0,delta_x/np.sqrt(delta_x**2+delta_z**2)]])
+            Rz = np.array([[delta_x/np.sqrt(delta_x**2+delta_y**2),-delta_y/np.sqrt(delta_x**2+delta_y**2),0],[delta_y/np.sqrt(delta_x**2+delta_y**2),delta_x/np.sqrt(delta_x**2+delta_y**2),0],[0,0,1]])
+            kernel_basis = np.array([Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[0]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[1]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[2])))])
+        
         kernel_coors_mat = []
         for vec in CT_basis:
             kernel_coors_mat.append(linalg.solve(kernel_basis.T,vec))
