@@ -316,7 +316,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     return voxel_info
     
 
-def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat):
+def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat,eff_voxels):
     '''
     Parameters:
     ----------
@@ -336,6 +336,9 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat)
     kernel_coors_mat :: list of numpy arrays
       change of coordinates matrix from CT array coordinates to kernel coordinates
     
+    eff_voxels :: tuple (3)
+      how far away from center in (x,y,z) does kernel have an effect (in number of CT voxels)
+    
     Returns:
     -------
     energy_deposited :: numpy array
@@ -352,11 +355,14 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat)
         voxel_diff[1] = voxel_array[n][1] - (voxel_info['indices'][1]-1)
         voxel_diff[2] = voxel_array[n][2] - (voxel_info['indices'][2]-1)
         
-        kernel_diff = kernel_coors_mat.dot(voxel_diff)
-        
-        kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
-        energy_deposited.append(kernel_value * voxel_info['TERMA'])
-        kernel_value_total += kernel_value
+        if abs(voxel_diff[0]) < eff_voxels[0] and abs(voxel_diff[1]) < eff_voxels[1] and abs(voxel_diff[2]) < eff_voxels[2]:
+            kernel_diff = kernel_coors_mat.dot(voxel_diff)
+
+            kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
+            energy_deposited.append(kernel_value * voxel_info['TERMA'])
+            kernel_value_total += kernel_value
+        else:
+            energy_deposited.append(0)
     
     # not 100% sure it needs to be a numpy array
     energy_deposited = np.array(energy_deposited)
@@ -374,10 +380,11 @@ def mask_superimpose(voxel_information):
     kernel_func = pickle.load(open('dose_calc_variables/kernel_func.pickle','rb'))
     center_coor = pickle.load(open('dose_calc_variables/center_coor.pickle','rb'))
     kernel_coors_mat = pickle.load(open('dose_calc_variables/kernel_coors_mat.pickle','rb'))
+    eff_voxels = pickle.load(open('dose_calc_variables/eff_voxels.pickle','rb'))
     
-    return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,kernel_coors_mat)
+    return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,kernel_coors_mat,eff_voxels)
 
-def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,num_cores):
+def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,num_cores):
     '''
     Parameters:
     ----------
@@ -397,6 +404,9 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
       a list of a list of dictionaries each with keys 'd' (distance spent in voxel in cm), 
       'indices' (the (x,y,z) indices of the voxel), and 'TERMA' (the TERMA).
       each element of the initial list corresponds to a different ray
+    
+    eff_distance :: tuple (3)
+      how far away from center in (x,y,z) does kernel have an effect (in cm)
     
     num_cores :: integer 
       number of cores to use 
@@ -438,6 +448,8 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     y = np.linspace(0,kernel_info['y']['bins']-1,kernel_info['y']['bins'])
     z = np.linspace(0,kernel_info['z']['bins']-1,kernel_info['z']['bins'])
     
+    eff_voxels = (eff_distance[0]/dx,eff_distance[1]/dy,eff_distance[2]/dz)
+    
     kernel_func = interpolate.RegularGridInterpolator((x,y,z),kernel_array,bounds_error=False,fill_value=0)
     
     center_coor = (int(np.floor(len(kernel_array)/2)),int(np.floor(len(kernel_array[0])/2)),int(np.floor(len(kernel_array[0][0])/2)))
@@ -449,7 +461,7 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     
     # this is where I can lower size of data too 
     voxel_array = np.array([[x,y,z] for x in x_voxels for y in y_voxels for z in z_voxels])
-        
+    
     energy_deposit = []
     
     CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,-dz]])
@@ -458,6 +470,7 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
     pickle.dump(kernel_func,open('dose_calc_variables/kernel_func.pickle','wb'))
     pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
+    pickle.dump(eff_voxels,open('dose_calc_variables/eff_voxels.pickle','wb'))
     
     p = Pool(num_cores)
     
@@ -594,7 +607,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
     kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
     
-    energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,num_cores)
+    energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,num_cores)
     return energy_deposit
 
 def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
