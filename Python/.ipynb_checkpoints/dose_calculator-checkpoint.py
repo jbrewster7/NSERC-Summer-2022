@@ -361,6 +361,8 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat,
             kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
             energy_deposited.append(kernel_value * voxel_info['TERMA'])
             kernel_value_total += kernel_value
+            if voxel_array[n][0] == 24 and voxel_array[n][1] == 24 and voxel_array[n][2] == 24:
+                print((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]),kernel_value)
         else:
             energy_deposited.append(0)
     
@@ -515,7 +517,7 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     return energy_deposit
     
     
-def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename,kernelname,kernel_size,num_cores):
+def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename,kernelname,kernel_size,eff_distance,num_cores):
     '''
     Parameters:
     ----------
@@ -550,6 +552,9 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     beam_coor :: list of tuples (3,2)
       list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
       list contains one tuple for each ray 
+    
+    eff_distance :: tuple (3)
+      how far away from center in (x,y,z) does kernel have an effect (in cm)
     
     num_cores :: integer 
       number of cores to use 
@@ -620,7 +625,7 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
       number of rays to make from the center (radius if ellipse and number in square grid)
     
     angle_spread :: tuple (3)
-      angle of farthest spread in the specified coordinate in degrees
+      angle of farthest spread in the specified coordinate in radians
     
     beam_coor :: tuple (3,2)
       initial and final coordinates of the center of the beam in the form ((x1,x2),(y1,y2),(z1,z2))
@@ -642,10 +647,10 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
     
     if direction == 'x':
         phi = np.arctan((beam_coor[0][1] - beam_coor[0][0])/delta_z)
-        beam_coors = [((beam_coor[0][0],beam_coor[0][0]+np.tan(theta+phi)),(beam_coor[1][0]+adjust,beam_coor[1][1]+adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]+[((beam_coor[0][0],beam_coor[0][0]+np.tan(theta+phi)),(beam_coor[1][0]-adjust,beam_coor[1][1]-adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]
+        beam_coors = [((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]+adjust,beam_coor[1][1]+adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]-adjust,beam_coor[1][1]-adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
     elif direction == 'y':
         phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
-        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread/2,angle_spread/2,num_rays//2)]
+        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
     else:
         raise ValueError('direction variable must be \'x\' or \'y\'')
     
