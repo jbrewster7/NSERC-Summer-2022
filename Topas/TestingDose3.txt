@@ -1,8 +1,8 @@
 includeFile = BoneWaterPhantom.txt
 
-i:Ge/Phantom/XBins = 50
-i:Ge/Phantom/YBins = 50
-i:Ge/Phantom/ZBins = 50
+#i:Ge/Phantom/XBins = 50
+#i:Ge/Phantom/YBins = 50
+#i:Ge/Phantom/ZBins = 50
 
 i:Ge/Water/XBins = 50
 i:Ge/Water/YBins = 50
