@@ -37,15 +37,19 @@ d:So/XRayBeam/BeamAngularCutoffX = 0.1 deg
 d:So/XRayBeam/BeamAngularCutoffY = 0.1 deg
 d:So/XRayBeam/BeamAngularSpreadX = 0.0 rad
 d:So/XRayBeam/BeamAngularSpreadY = 0.0 rad
-i:So/XRayBeam/NumberOfHistoriesInRun = 100000
+i:So/XRayBeam/NumberOfHistoriesInRun = 10000000
 i:So/XRayBeam/NumberOfHistoriesInRandomJob = 0 # do I need this?
 
 i:Ts/ShowHistoryCountAtInterval = 1000000
 #b:Ts/ShowCPUTime = "True"
 
-s:Sc/TestingDose3/Quantity = "DoseToMedium"
-s:Sc/TestingDose3/Component = "Phantom"
-b:Sc/TestingDose3/PropagateToChildren = "True"
+s:Sc/TestingDose3_Bone/Quantity = "DoseToMedium"
+s:Sc/TestingDose3_Bone/Component = "Bone"
+s:Sc/TestingDose3_Bone/IfOutputFileAlreadyExists = "Overwrite"
+
+s:Sc/TestingDose3_Water/Quantity = "DoseToMedium"
+s:Sc/TestingDose3_Water/Component = "Water"
+s:Sc/TestingDose3_Water/IfOutputFileAlreadyExists = "Overwrite"
 
 #Ts/UseQt = "True"
 
@@ -53,4 +57,4 @@ b:Sc/TestingDose3/PropagateToChildren = "True"
 #b:Gr/ViewA/IncludeAxes = "False"
 #d:Gr/ViewA/AxesSize = 1. m
 
-s:Sc/TestingDose3/IfOutputFileAlreadyExists = "Overwrite"
+i:Ts/NumberOfThreads = 4
