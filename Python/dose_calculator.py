@@ -7,6 +7,9 @@ from multiprocessing import Pool
 import pickle
 from numpy import linalg
 
+# constants
+CORT_BONE_DENSITY = 1.92
+
 def alpha_func(plane,coor1,coor2):
     '''
     plane is assumed to be already calculated
@@ -136,25 +139,6 @@ def plot_grid_3D(size,bins,ifig=None,colour='b'):
             ax.plot3D([x,x],[y,y],[0,size[2]],colour)
     
     return ax,fig
-
-def density(index):
-    '''
-    THIS FUNCTION IS ONLY FOR WATER RIGHT NOW 
-    
-    Parameters:
-    ----------
-    index :: tuple (3)
-      indices of the voxel whose density you want
-    
-    Returns:
-    -------
-    density :: float
-      density of that voxel in g/cm^3 
-    
-    '''
-    
-    return 1
-    
 
 def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     '''
@@ -309,14 +293,14 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
         if voxel_info[index]['d'] != 0:
             voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m'))
             intermediate_list.append(voxel_info[index])
-            fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*density(voxel_info[index]['indices'])*voxel_info[index]['d'])
+            fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
 
     voxel_info = intermediate_list
     
     return voxel_info
     
 
-def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat,eff_voxels):
+def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,eff_voxels,mat_array):
     '''
     Parameters:
     ----------
@@ -327,8 +311,11 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat,
     voxel_array :: numpy array 
       contains all of the (x,y,z) coordinants of all of the voxels 
     
-    kernel_func :: function 
-      interpolated kernel 
+    kernel_func_water :: function 
+      interpolated water kernel 
+    
+    kernel_func_bone :: function 
+      interpolated bone kernel 
     
     center_coor :: tuple (3,3)
       coordinates of the center of the kernel
@@ -338,6 +325,9 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat,
     
     eff_voxels :: tuple (3)
       how far away from center in (x,y,z) does kernel have an effect (in number of CT voxels)
+    
+    mat_array :: numpy array 
+      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'b' for bone)
     
     Returns:
     -------
@@ -350,6 +340,26 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat,
     kernel_value_total = 0
     voxel_diff = ['','','']
     
+    def kernel_func(ker_coors,CT_coors):
+        '''
+        Parameters:
+        ----------
+        ker_coors :: tuple (3)
+          coordinates of the voxel with respect to the kernel 
+        
+        CT_coors :: tuple (3)
+          coordinates of the voxel with respect to the CT array
+        
+        Returns:
+        -------
+        kernel_val :: float 
+          value of the kernel at that point as a fraction of total 
+        '''
+        if mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'w':
+            return kernel_func_water(ker_coors)
+        elif mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'b':
+            return kernel_func_bone(ker_coors)
+    
     for n in range(len(voxel_array)):
         voxel_diff[0] = voxel_array[n][0] - (voxel_info['indices'][0]-1)
         voxel_diff[1] = voxel_array[n][1] - (voxel_info['indices'][1]-1)
@@ -358,11 +368,9 @@ def Superimpose(voxel_info,voxel_array,kernel_func,center_coor,kernel_coors_mat,
         if abs(voxel_diff[0]) < eff_voxels[0] and abs(voxel_diff[1]) < eff_voxels[1] and abs(voxel_diff[2]) < eff_voxels[2]:
             kernel_diff = kernel_coors_mat.dot(voxel_diff)
 
-            kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
+            kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]),(voxel_array[n][0],voxel_array[n][1],voxel_array[n][2]))
             energy_deposited.append(kernel_value * voxel_info['TERMA'])
             kernel_value_total += kernel_value
-            if voxel_array[n][0] == 24 and voxel_array[n][1] == 24 and voxel_array[n][2] == 24:
-                print((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]),kernel_value)
         else:
             energy_deposited.append(0)
     
@@ -379,19 +387,22 @@ def mask_superimpose(voxel_information):
     masks Superimpose() so that it can be called by Pool
     '''
     voxel_array = pickle.load(open('dose_calc_variables/voxel_array.pickle','rb'))
-    kernel_func = pickle.load(open('dose_calc_variables/kernel_func.pickle','rb'))
+    kernel_func_water = pickle.load(open('dose_calc_variables/kernel_func_water.pickle','rb'))
+    kernel_func_bone = pickle.load(open('dose_calc_variables/kernel_func_bone.pickle','rb'))
     center_coor = pickle.load(open('dose_calc_variables/center_coor.pickle','rb'))
     kernel_coors_mat = pickle.load(open('dose_calc_variables/kernel_coors_mat.pickle','rb'))
     eff_voxels = pickle.load(open('dose_calc_variables/eff_voxels.pickle','rb'))
+    mat_array = pickle.load(open('dose_calc_variables/mat_array.pickle','rb'))
     
-    return Superimpose(voxel_information,voxel_array,kernel_func,center_coor,kernel_coors_mat,eff_voxels)
+    return Superimpose(voxel_information,voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,eff_voxels,mat_array)
 
-def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,num_cores):
+def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores):
     '''
     Parameters:
     ----------
-    kernel_array :: numpy array 
-      array with normalized kernel: should be an odd number of voxels, interacting in the center
+    kernel_arrays :: list of numpy arrays
+      list of arrays with normalized kernels: should be an odd number of voxels, interacting in the center
+      in order of [water,bone]
     
     kernel_size :: tuple (3)
       (x,y,z) dimensions of the kernel in cm 
@@ -409,6 +420,9 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     
     eff_distance :: tuple (3)
       how far away from center in (x,y,z) does kernel have an effect (in cm)
+    
+    mat_array :: numpy array 
+      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'b' for bone)
     
     num_cores :: integer 
       number of cores to use 
@@ -429,13 +443,14 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     dz = voxel_lengths[2]
     
     kernel_info = {}
+    
     kernel_info['x'] = {}
     kernel_info['y'] = {}
     kernel_info['z'] = {}
 
-    kernel_info['x']['bins'] = len(kernel_array)
-    kernel_info['y']['bins'] = len(kernel_array[0])
-    kernel_info['z']['bins'] = len(kernel_array[0][0])
+    kernel_info['x']['bins'] = len(kernel_arrays[0])
+    kernel_info['y']['bins'] = len(kernel_arrays[0][0])
+    kernel_info['z']['bins'] = len(kernel_arrays[0][0][0])
 
     kernel_info['x']['size'] = kernel_size[0]
     kernel_info['y']['size'] = kernel_size[1]
@@ -452,10 +467,11 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     
     eff_voxels = (eff_distance[0]/dx,eff_distance[1]/dy,eff_distance[2]/dz)
     
-    kernel_func = interpolate.RegularGridInterpolator((x,y,z),kernel_array,bounds_error=False,fill_value=0)
+    kernel_func_water = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[0],bounds_error=False,fill_value=0)
+    kernel_func_bone = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[1],bounds_error=False,fill_value=0)
     
-    center_coor = (int(np.floor(len(kernel_array)/2)),int(np.floor(len(kernel_array[0])/2)),int(np.floor(len(kernel_array[0][0])/2)))
-        
+    center_coor = (int(np.floor(len(kernel_arrays[0])/2)),int(np.floor(len(kernel_arrays[0][0])/2)),int(np.floor(len(kernel_arrays[0][0][0])/2)))
+    
     # making array for labelling voxels 
     x_voxels = np.linspace(0,Nx-2,Nx-1,dtype=np.uint16)
     y_voxels = np.linspace(0,Ny-2,Ny-1,dtype=np.uint16)
@@ -466,13 +482,15 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     
     energy_deposit = []
     
-    CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,-dz]])
+    CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,dz]])
     pre_rotated_ker = np.array([[kernel_info['x']['voxel_size'],0,0],[0,kernel_info['y']['voxel_size'],0],[0,0,kernel_info['z']['voxel_size']]])
     
     pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
-    pickle.dump(kernel_func,open('dose_calc_variables/kernel_func.pickle','wb'))
+    pickle.dump(kernel_func_water,open('dose_calc_variables/kernel_func_water.pickle','wb'))
+    pickle.dump(kernel_func_bone,open('dose_calc_variables/kernel_func_bone.pickle','wb'))
     pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
     pickle.dump(eff_voxels,open('dose_calc_variables/eff_voxels.pickle','wb'))
+    pickle.dump(mat_array,open('dose_calc_variables/mat_array.pickle','wb'))
     
     p = Pool(num_cores)
     
@@ -517,7 +535,7 @@ def Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,b
     return energy_deposit
     
     
-def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filename,kernelname,kernel_size,eff_distance,num_cores):
+def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores):
     '''
     Parameters:
     ----------
@@ -540,11 +558,12 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     ini_fluence :: float
       the initial photon fluence in cm^-2
     
-    filename :: str 
-      name of the file that contains values for energy absorption coefficients 
+    filenames :: list of str 
+      list of name of the file that contains values for energy absorption coefficients in order of [water,bone]
     
-    kernelname :: str
-      name or pathway of file from TOPAS that contains kernel information
+    kernelnames :: list of str
+      list of name or pathway of file from TOPAS that contains kernel information in order of [water,bone]
+      NOTE: kernels must have the same dimensions and number of bins in each direction
     
     kernel_size :: tuple (3)
       (x,y,z) dimensions of the kernel in cm 
@@ -556,6 +575,9 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     eff_distance :: tuple (3)
       how far away from center in (x,y,z) does kernel have an effect (in cm)
     
+    mat_array :: numpy array 
+      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'b' for bone)
+    
     num_cores :: integer 
       number of cores to use 
     
@@ -565,10 +587,15 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
-    # making mu interpolation function
-    coeff_array = np.loadtxt(filename,skiprows=2,dtype=float)
-    mu_linear = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
-    mu_mass = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
+    # making mu interpolation function for water
+    coeff_array = np.loadtxt(filenames[0],skiprows=2,dtype=float)
+    mu_linear_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
+    mu_mass_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
+    
+    # making mu interpolation function for bone
+    coeff_array = np.loadtxt(filenames[1],skiprows=2,dtype=float)
+    mu_linear_bone = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
+    mu_mass_bone = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
     
     def mu(energy,voxel_index,kind):
         '''
@@ -588,16 +615,26 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         Returns:
         -------
         absorption_coefficient :: float 
-          linear or mass energy absorption coefficient
+          linear energy absorption coefficient in cm^{-1} or 
+          mass energy absorption coefficient in cm^2/g
 
         '''
-        # exponentially interpolate 
-        if kind == 'l':
-            return np.exp(mu_linear(np.log(energy))) 
-        elif kind == 'm':
-            return np.exp(mu_mass(np.log(energy))) 
-        else:
-            raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
+        # exponential interpolation
+        
+        if mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1] == 'w':
+            if kind == 'l':
+                return np.exp(mu_linear_water(np.log(energy)))
+            elif kind == 'm':
+                return np.exp(mu_mass_water(np.log(energy)))
+            else:
+                raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
+        elif mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1] == 'b':
+            if kind == 'l':
+                return np.exp(mu_linear_bone(np.log(energy)))*CORT_BONE_DENSITY
+            elif kind == 'm':
+                return np.exp(mu_mass_bone(np.log(energy)))
+            else:
+                raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
     
     voxel_info = []
     
@@ -605,14 +642,22 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     ini_fluence = np.array(ini_fluence)
     
     for n in range(len(beam_coor)): 
+        if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
+            raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
         voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),mu))
     
     # I don't think I really need to do this anymore... but it kinda keeps it clean so idk
     # maybe take this out later
-    kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
-    kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
+    kernel_arrays = []
+    for kernelname in kernelnames:
+        kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
+        kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
+        kernel_arrays.append(kernel_array)
     
-    energy_deposit = Superposition(kernel_array,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,num_cores)
+    if len(kernel_arrays[0]) != len(kernel_arrays[1]) or len(kernel_arrays[0][0]) != len(kernel_arrays[1][0]) or len(kernel_arrays[0][0][0]) != len(kernel_arrays[1][0][0]):
+        raise ValueError('Both water and bone kernel must have same dimensions and number of bins.')
+    
+    energy_deposit = Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores)
     return energy_deposit
 
 def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
