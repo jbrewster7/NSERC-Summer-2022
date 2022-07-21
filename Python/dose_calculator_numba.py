@@ -6,15 +6,11 @@ from topas2numpy import BinnedResult
 from multiprocessing import Pool
 import pickle
 from numpy import linalg
+import numba 
+from numba import jit
 
 # constants
 CORT_BONE_DENSITY = 1.92
-
-# indexing constants for materials
-WATER_IND = 0
-CORT_BONE_IND = 1
-LUNG_IND = 2
-AIR_IND = 3
 
 def alpha_func(plane,coor1,coor2):
     '''
@@ -304,7 +300,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     
     return voxel_info
     
-
+@jit(parallel=True)
 def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_bone_total,eff_voxels,mat_array):
     '''
     Parameters:
@@ -410,6 +406,7 @@ def mask_superimpose(voxel_information):
     
     return Superimpose(voxel_information,voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_bone_total,eff_voxels,mat_array)
 
+@jit(parallel=True)
 def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores):
     '''
     Parameters:
@@ -481,12 +478,12 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     
     eff_voxels = (eff_distance[0]/dx,eff_distance[1]/dy,eff_distance[2]/dz)
     
-    kernel_func_water = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[WATER_IND],bounds_error=False,fill_value=0)
-    kernel_func_bone = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[CORT_BONE_IND],bounds_error=False,fill_value=0)
+    kernel_func_water = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[0],bounds_error=False,fill_value=0)
+    kernel_func_bone = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[1],bounds_error=False,fill_value=0)
     
     print('Kernel Interpolated')
     
-    center_coor = (int(np.floor(len(kernel_arrays[WATER_IND])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0][0])/2)))
+    center_coor = (int(np.floor(len(kernel_arrays[0])/2)),int(np.floor(len(kernel_arrays[0][0])/2)),int(np.floor(len(kernel_arrays[0][0][0])/2)))
     
     # making array for labelling voxels 
     x_voxels = np.linspace(0,Nx-2,Nx-1,dtype=np.uint16)
@@ -501,14 +498,14 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,dz]])
     pre_rotated_ker = np.array([[kernel_info['x']['voxel_size'],0,0],[0,kernel_info['y']['voxel_size'],0],[0,0,kernel_info['z']['voxel_size']]])
     
-    pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
-    pickle.dump(kernel_func_water,open('dose_calc_variables/kernel_func_water.pickle','wb'))
-    pickle.dump(kernel_func_bone,open('dose_calc_variables/kernel_func_bone.pickle','wb'))
-    pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
-    pickle.dump(eff_voxels,open('dose_calc_variables/eff_voxels.pickle','wb'))
-    pickle.dump(mat_array,open('dose_calc_variables/mat_array.pickle','wb'))
+#     pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
+#     pickle.dump(kernel_func_water,open('dose_calc_variables/kernel_func_water.pickle','wb'))
+#     pickle.dump(kernel_func_bone,open('dose_calc_variables/kernel_func_bone.pickle','wb'))
+#     pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
+#     pickle.dump(eff_voxels,open('dose_calc_variables/eff_voxels.pickle','wb'))
+#     pickle.dump(mat_array,open('dose_calc_variables/mat_array.pickle','wb'))
     
-    p = Pool(num_cores)
+    # p = Pool(num_cores)
     
     for ray in range(len(voxel_info)):
         energy_deposit.append([])
@@ -561,17 +558,21 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
             kernel_value_water_total += kernel_value_water
             kernel_value_bone_total += kernel_value_bone
         
-        pickle.dump(kernel_value_water_total,open('dose_calc_variables/kernel_value_water_total.pickle','wb'))
-        pickle.dump(kernel_value_bone_total,open('dose_calc_variables/kernel_value_bone_total.pickle','wb'))
-        pickle.dump(kernel_coors_mat,open('dose_calc_variables/kernel_coors_mat.pickle','wb'))
+        # pickle.dump(kernel_value_water_total,open('dose_calc_variables/kernel_value_water_total.pickle','wb'))
+        # pickle.dump(kernel_value_bone_total,open('dose_calc_variables/kernel_value_bone_total.pickle','wb'))
+        # pickle.dump(kernel_coors_mat,open('dose_calc_variables/kernel_coors_mat.pickle','wb'))
         
-        energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
+        # energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
         
-        # energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind],voxel_array,kernel_func,center_coor,(dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size'])) for voxel_ind in range(len(voxel_info[ray]))]
+        energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind],voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_bone_total,eff_voxels,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
+        
+        energy_deposit[ray] = []
+        for voxel_ind in range(len(voxel_info[ray])):
+            energy_deposit[ray].append(Superimpose(voxel_info[ray][voxel_ind],voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_bone_total,eff_voxels,mat_array))
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
         print(ray)
-    p.close()
+    # p.close()
     
     energy_deposit = np.array(sum(energy_deposit))
     energy_deposit = energy_deposit.reshape(Nx-1,Ny-1,Nz-1)
@@ -632,12 +633,12 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     '''
     # making mu interpolation function for water
-    coeff_array = np.loadtxt(filenames[WATER_IND],skiprows=2,dtype=float)
+    coeff_array = np.loadtxt(filenames[0],skiprows=2,dtype=float)
     mu_linear_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
     mu_mass_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
     
     # making mu interpolation function for bone
-    coeff_array = np.loadtxt(filenames[CORT_BONE_IND],skiprows=2,dtype=float)
+    coeff_array = np.loadtxt(filenames[1],skiprows=2,dtype=float)
     mu_linear_bone = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
     mu_mass_bone = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
     
@@ -698,7 +699,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
         kernel_arrays.append(kernel_array)
     
-    if len(kernel_arrays[WATER_IND]) != len(kernel_arrays[CORT_BONE_IND]) or len(kernel_arrays[WATER_IND][0]) != len(kernel_arrays[CORT_BONE_IND][0]) or len(kernel_arrays[WATER_IND][0][0]) != len(kernel_arrays[CORT_BONE_IND][0][0]):
+    if len(kernel_arrays[0]) != len(kernel_arrays[1]) or len(kernel_arrays[0][0]) != len(kernel_arrays[1][0]) or len(kernel_arrays[0][0][0]) != len(kernel_arrays[1][0][0]):
         raise ValueError('Both water and bone kernel must have same dimensions and number of bins.')
     
     print('Calling Superposition')
@@ -742,7 +743,7 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
     elif direction == 'y':
         phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
         beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
-        beam_coors = [((beam[0][0],beam[0][1]),(beam[1][0]+adjust,beam[1][1]+adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] + [((beam[0][0],beam[0][1]),(beam[1][0]+adjust*0.5,beam[1][1]+adjust*0.5),(beam[2][0],beam[2][1])) for beam in beam_coors] + beam_coors + [((beam[0][0],beam[0][1]),(beam[1][0]-adjust*0.5,beam[1][1]-adjust*0.5),(beam[2][0],beam[2][1])) for beam in beam_coors] + [((beam[0][0],beam[0][1]),(beam[1][0]-adjust,beam[1][1]-adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] 
+        beam_coors = [((beam[0][0],beam[0][1]),(beam[1][0]+adjust,beam[1][1]+adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] + beam_coors + [((beam[0][0],beam[0][1]),(beam[1][0]-adjust,beam[1][1]-adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] 
     else:
         raise ValueError('direction variable must be \'x\' or \'y\'')
     
