@@ -9,11 +9,12 @@ from numpy import linalg
 
 # constants
 CORT_BONE_DENSITY = 1.92
+LUNG_DENSITY = 1.04
 
 # indexing constants for materials
 WATER_IND = 0
-CORT_BONE_IND = 1
-LUNG_IND = 2
+LUNG_IND = 1
+CORT_BONE_IND = 2
 AIR_IND = 3
 
 def alpha_func(plane,coor1,coor2):
@@ -163,7 +164,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
       initial plane coordinates
     
     plot :: bool
-      if True, plots a graphical representation of the problem
+      if True, plots a graphical representation of the problem (only works for ini_planes all 0)
     
     Returns:
     -------
@@ -185,7 +186,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     coor_values['y']['1,2'] = beam_coor[1]
     coor_values['z']['1,2'] = beam_coor[2]
 
-    coor_values['x']['plane'] = [ini_planes[0]] # this ends up being min,max
+    coor_values['x']['plane'] = [ini_planes[0]] # this ends up being min,max planes
     coor_values['y']['plane'] = [ini_planes[1]]
     coor_values['z']['plane'] = [ini_planes[2]]
 
@@ -197,10 +198,9 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
             coor_values[key]['alpha_minmax'] = (alpha_func(coor_values[key]['plane'][0],coor_values[key]['1,2'][0],coor_values[key]['1,2'][1]),alpha_func(coor_values[key]['plane'][-1],coor_values[key]['1,2'][0],coor_values[key]['1,2'][1]))
         else:
             coor_values[key]['alpha_minmax'] = (0,1) # set to this so that it doesn't affect later business
-
+    
     alpha_min = max(0,min(coor_values['x']['alpha_minmax']),min(coor_values['y']['alpha_minmax']),min(coor_values['z']['alpha_minmax']))
     alpha_max = min(1,max(coor_values['x']['alpha_minmax']),max(coor_values['y']['alpha_minmax']),max(coor_values['z']['alpha_minmax']))
-    
     
     for key in coor_values.keys():
         if coor_values[key]['1,2'][1] - coor_values[key]['1,2'][0] >= 0:
@@ -215,7 +215,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
             indmin = int(np.ceil(indmin))
             indmax = int(np.floor(indmax))
             coor_values[key]['indminmax'] = (indmin,indmax)
-    
+        
     alpha_coor_set = {}
 
     for key in coor_values.keys():
@@ -253,7 +253,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     
     return(voxel_info)
 
-def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,mu):
+def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_spread,beam_energy,ini_fluence,mu):
     '''
     Parameters:
     ----------
@@ -268,6 +268,12 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     
     ini_planes :: tuple (3)
       initial plane coordinates
+    
+    angle_spread :: tuple (3) 
+      angle of beam in (x,y,z) in radians
+    
+    position_spread :: tuple (3)
+      position spread of beam in (x,y,z) in cm
     
     beam_energy :: numpy array
       vector containing the the beam energies in MeV (corresponding to ini_fluence)
@@ -286,6 +292,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
       and 'TERMA' (the total energy released per unit mass in that voxel) in MeV/g
     
     '''
+    eps = 1.e-7
     
     voxel_info = Siddon(num_planes,voxel_lengths,beam_coor,ini_planes)
     
@@ -294,18 +301,29 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,
     
     # this is also calculating TERMA at the beginning of each voxel not the middle 
     intermediate_list = []
-    for index in range(len(voxel_info)):
-        if voxel_info[index]['d'] != 0:
-            voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m'))
-            intermediate_list.append(voxel_info[index])
-            fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
-
-    voxel_info = intermediate_list
+    
+    if angle_spread[0] <= eps and angle_spread[1] <= eps and angle_spread[2] <= eps:
+        for index in range(len(voxel_info)):
+            if voxel_info[index]['d'] != 0:
+                voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m'))
+                intermediate_list.append(voxel_info[index])
+                fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
+        voxel_info = intermediate_list
+        
+    elif angle_spread[1] > eps:
+        total_dist = position_spread[1]/angle_spread[1]
+        for index in range(len(voxel_info)):
+            if voxel_info[index]['d'] != 0:
+                voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m')/total_dist)
+                intermediate_list.append(voxel_info[index])
+                total_dist += voxel_info[index]['d']
+                fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
+        voxel_info = intermediate_list
     
     return voxel_info
     
 
-def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_bone_total,eff_voxels,mat_array):
+def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_lung,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_lung_total,kernel_value_bone_total,eff_voxels,mat_array):
     '''
     Parameters:
     ----------
@@ -338,7 +356,7 @@ def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_bone,center
       how far away from center in (x,y,z) does kernel have an effect (in number of CT voxels)
     
     mat_array :: numpy array 
-      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'b' for bone)
+      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'l' for lung, 'b' for bone)
     
     Returns:
     -------
@@ -368,6 +386,8 @@ def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_bone,center
         '''
         if mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'w':
             return kernel_func_water(ker_coors)/kernel_value_water_total
+        elif mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'l':
+            return kernel_func_lung(ker_coors)/kernel_value_lung_total
         elif mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'b':
             return kernel_func_bone(ker_coors)/kernel_value_bone_total
     
@@ -381,6 +401,11 @@ def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_bone,center
 
             kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]),(voxel_array[n][0],voxel_array[n][1],voxel_array[n][2]))
             energy_deposited.append(kernel_value * voxel_info['TERMA'])
+            
+            # if voxel_diff[0] == 0 and voxel_diff[1] == 0 and voxel_diff[2] == 0:
+            #     print(str(voxel_info['TERMA']) + '->' + str(kernel_value * voxel_info['TERMA']))
+                # print(voxel_info)
+            
             # kernel_value_total += kernel_value
         else:
             energy_deposited.append(0)
@@ -389,8 +414,9 @@ def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_bone,center
     energy_deposited = np.array(energy_deposited)
     
     # if kernel_value_total != 0:
-    #     energy_deposited = energy_deposited/kernel_value_total
-    #     print('two totals' + str(kernel_value_total) + str(kernel_value_water_total))
+        # energy_deposited = energy_deposited/kernel_value_total
+        # print(energy_deposited)
+        # print('two totals' + str(kernel_value_total*kernel_value_bone_total) + str(kernel_value_bone_total))
     
     return energy_deposited
 
@@ -400,15 +426,17 @@ def mask_superimpose(voxel_information):
     '''
     voxel_array = pickle.load(open('dose_calc_variables/voxel_array.pickle','rb'))
     kernel_func_water = pickle.load(open('dose_calc_variables/kernel_func_water.pickle','rb'))
+    kernel_func_lung = pickle.load(open('dose_calc_variables/kernel_func_lung.pickle','rb'))
     kernel_func_bone = pickle.load(open('dose_calc_variables/kernel_func_bone.pickle','rb'))
     center_coor = pickle.load(open('dose_calc_variables/center_coor.pickle','rb'))
     kernel_coors_mat = pickle.load(open('dose_calc_variables/kernel_coors_mat.pickle','rb'))
     kernel_value_water_total = pickle.load(open('dose_calc_variables/kernel_value_water_total.pickle','rb'))
+    kernel_value_lung_total = pickle.load(open('dose_calc_variables/kernel_value_lung_total.pickle','rb'))
     kernel_value_bone_total = pickle.load(open('dose_calc_variables/kernel_value_bone_total.pickle','rb'))
     eff_voxels = pickle.load(open('dose_calc_variables/eff_voxels.pickle','rb'))
     mat_array = pickle.load(open('dose_calc_variables/mat_array.pickle','rb'))
     
-    return Superimpose(voxel_information,voxel_array,kernel_func_water,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_bone_total,eff_voxels,mat_array)
+    return Superimpose(voxel_information,voxel_array,kernel_func_water,kernel_func_lung,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_lung_total,kernel_value_bone_total,eff_voxels,mat_array)
 
 def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores):
     '''
@@ -416,7 +444,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     ----------
     kernel_arrays :: list of numpy arrays
       list of arrays with normalized kernels: should be an odd number of voxels, interacting in the center
-      in order of [water,bone]
+      in order of [water,lung,bone]
     
     kernel_size :: tuple (3)
       (x,y,z) dimensions of the kernel in cm 
@@ -436,7 +464,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
       how far away from center in (x,y,z) does kernel have an effect (in cm)
     
     mat_array :: numpy array 
-      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'b' for bone)
+      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'l' for lung, 'b' for bone)
     
     num_cores :: integer 
       number of cores to use 
@@ -482,6 +510,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     eff_voxels = (eff_distance[0]/dx,eff_distance[1]/dy,eff_distance[2]/dz)
     
     kernel_func_water = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[WATER_IND],bounds_error=False,fill_value=0)
+    kernel_func_lung = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[LUNG_IND],bounds_error=False,fill_value=0)
     kernel_func_bone = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[CORT_BONE_IND],bounds_error=False,fill_value=0)
     
     print('Kernel Interpolated')
@@ -503,6 +532,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     
     pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
     pickle.dump(kernel_func_water,open('dose_calc_variables/kernel_func_water.pickle','wb'))
+    pickle.dump(kernel_func_lung,open('dose_calc_variables/kernel_func_lung.pickle','wb'))
     pickle.dump(kernel_func_bone,open('dose_calc_variables/kernel_func_bone.pickle','wb'))
     pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
     pickle.dump(eff_voxels,open('dose_calc_variables/eff_voxels.pickle','wb'))
@@ -545,6 +575,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
             voxel_array_for_total = voxel_array
         
         kernel_value_water_total = 0
+        kernel_value_lung_total = 0
         kernel_value_bone_total = 0
         
         voxel_diff = [0,0,0]
@@ -556,15 +587,18 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
             kernel_diff = kernel_coors_mat.dot(voxel_diff)
                         
             kernel_value_water = kernel_func_water((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
+            kernel_value_lung = kernel_func_lung((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
             kernel_value_bone = kernel_func_bone((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
             
             kernel_value_water_total += kernel_value_water
+            kernel_value_lung_total += kernel_value_lung
             kernel_value_bone_total += kernel_value_bone
         
         pickle.dump(kernel_value_water_total,open('dose_calc_variables/kernel_value_water_total.pickle','wb'))
+        pickle.dump(kernel_value_lung_total,open('dose_calc_variables/kernel_value_lung_total.pickle','wb'))
         pickle.dump(kernel_value_bone_total,open('dose_calc_variables/kernel_value_bone_total.pickle','wb'))
         pickle.dump(kernel_coors_mat,open('dose_calc_variables/kernel_coors_mat.pickle','wb'))
-        
+                
         energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
         
         # energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind],voxel_array,kernel_func,center_coor,(dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size'])) for voxel_ind in range(len(voxel_info[ray]))]
@@ -579,7 +613,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     return energy_deposit
     
     
-def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores):
+def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores):
     '''
     Parameters:
     ----------
@@ -602,11 +636,17 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     ini_fluence :: float
       the initial photon fluence in cm^-2
     
+    angle_spread :: tuple (3)
+      angle of beam in (x,y,z) in radians
+    
+    position_spread :: tuple (3)
+      position spread of beam in (x,y,z) in cm
+    
     filenames :: list of str 
-      list of name of the file that contains values for energy absorption coefficients in order of [water,bone]
+      list of name of the file that contains values for energy absorption coefficients in order of [water,lung,bone]
     
     kernelnames :: list of str
-      list of name or pathway of file from TOPAS that contains kernel information in order of [water,bone]
+      list of name or pathway of file from TOPAS that contains kernel information in order of [water,lung,bone]
       NOTE: kernels must have the same dimensions and number of bins in each direction
     
     kernel_size :: tuple (3)
@@ -620,7 +660,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       how far away from center in (x,y,z) does kernel have an effect (in cm)
     
     mat_array :: numpy array 
-      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'b' for bone)
+      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'l' for lung, 'b' for bone)
     
     num_cores :: integer 
       number of cores to use 
@@ -636,6 +676,11 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     mu_linear_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
     mu_mass_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
     
+    # making mu interpolation function for lung
+    coeff_array = np.loadtxt(filenames[LUNG_IND],skiprows=2,dtype=float)
+    mu_linear_lung = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
+    mu_mass_lung = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
+    
     # making mu interpolation function for bone
     coeff_array = np.loadtxt(filenames[CORT_BONE_IND],skiprows=2,dtype=float)
     mu_linear_bone = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
@@ -643,7 +688,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     def mu(energy,voxel_index,kind):
         '''
-        This is currently only set-up for water and cortical bone, will update later.
+        This is currently only set-up for water, lung, and cortical bone, will update later.
 
         Parameters:
         ----------
@@ -672,11 +717,18 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
                 return np.exp(mu_mass_water(np.log(energy)))
             else:
                 raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
+        elif mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1] == 'l':
+            if kind == 'l':
+                return np.exp(mu_linear_lung(np.log(energy)))*LUNG_DENSITY
+            elif kind == 'm':
+                return np.exp(mu_mass_lung(np.log(energy)))
+            else:
+                raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
         elif mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1] == 'b':
             if kind == 'l':
                 return np.exp(mu_linear_bone(np.log(energy)))*CORT_BONE_DENSITY
             elif kind == 'm':
-                return np.exp(mu_mass_bone(np.log(energy)))*1.6
+                return np.exp(mu_mass_bone(np.log(energy)))
             else:
                 raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
     
@@ -685,11 +737,16 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     beam_energy = np.array(beam_energy)
     ini_fluence = np.array(ini_fluence)
     
+    # this is temporary for the case I'm working on rn
+    if angle_spread[1] != 0:
+        ini_fluence = ini_fluence*np.pi*position_spread[0]*position_spread[0]
+        ini_fluence = ini_fluence/(2*angle_spread[1]*position_spread[0])
+    
     for n in range(len(beam_coor)): 
         if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
             raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
-        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,beam_energy,ini_fluence/len(beam_coor),mu))
-    
+        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu))
+        
     # I don't think I really need to do this anymore... but it kinda keeps it clean so idk
     # maybe take this out later
     kernel_arrays = []
@@ -706,7 +763,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     energy_deposit = Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores)
     return energy_deposit
 
-def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
+def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025,kind='linear'):
     '''
     Makes the rays for a fan beam. 
     
@@ -735,15 +792,19 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025):
     
     '''
     delta_z = beam_coor[2][1] - beam_coor[2][0]
-    
-    if direction == 'x':
-        phi = np.arctan((beam_coor[0][1] - beam_coor[0][0])/delta_z)
-        beam_coors = [((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]+adjust,beam_coor[1][1]+adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]-adjust,beam_coor[1][1]-adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
-    elif direction == 'y':
+    if kind == 'linear':
+        if direction == 'x':
+            phi = np.arctan((beam_coor[0][1] - beam_coor[0][0])/delta_z)
+            beam_coors = [((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]+adjust,beam_coor[1][1]+adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]-adjust,beam_coor[1][1]-adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
+        elif direction == 'y':
+            phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
+            beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
+            # beam_coors = [((beam[0][0],beam[0][1]),(beam[1][0]+adjust,beam[1][1]+adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] + [((beam[0][0],beam[0][1]),(beam[1][0]-adjust,beam[1][1]-adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] 
+            beam_coors = [((beam_coors[len(beam_coors)-1-index][0][0],beam_coors[len(beam_coors)-1-index][0][1]),(beam_coors[len(beam_coors)-1-index][1][0]+adjust*((index-(len(beam_coors)-1)/2)*2/(len(beam_coors)-1)),beam_coors[len(beam_coors)-1-index][1][1]+adjust*((index-(len(beam_coors)-1)/2)*2/(len(beam_coors)-1))),(beam_coors[len(beam_coors)-1-index][2][0],beam_coors[len(beam_coors)-1-index][2][1])) for index in range(len(beam_coors))]
+        else:
+            raise ValueError('direction variable must be \'x\' or \'y\'')
+    elif kind == 'trial':
         phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
-        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
-        beam_coors = [((beam[0][0],beam[0][1]),(beam[1][0]+adjust,beam[1][1]+adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] + [((beam[0][0],beam[0][1]),(beam[1][0]+adjust*0.5,beam[1][1]+adjust*0.5),(beam[2][0],beam[2][1])) for beam in beam_coors] + beam_coors + [((beam[0][0],beam[0][1]),(beam[1][0]-adjust*0.5,beam[1][1]-adjust*0.5),(beam[2][0],beam[2][1])) for beam in beam_coors] + [((beam[0][0],beam[0][1]),(beam[1][0]-adjust,beam[1][1]-adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] 
-    else:
-        raise ValueError('direction variable must be \'x\' or \'y\'')
+        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in (np.linspace(0,1,num_rays))**2*angle_spread] +[((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in -(np.linspace(0,1,num_rays))**2*angle_spread] + [((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in (np.linspace(0,1,num_rays))**2*angle_spread] +[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in -(np.linspace(0,1,num_rays))**2*angle_spread]
     
     return beam_coors
