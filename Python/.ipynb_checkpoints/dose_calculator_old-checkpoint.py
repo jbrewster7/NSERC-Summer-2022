@@ -6,8 +6,6 @@ from topas2numpy import BinnedResult
 from multiprocessing import Pool
 import pickle
 from numpy import linalg
-import numba
-from numba import jit,njit
 
 # constants
 CORT_BONE_DENSITY = 1.92
@@ -324,26 +322,41 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     
     return voxel_info
     
-@jit
-def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
+
+def Superimpose(voxel_info,voxel_array,kernel_func_water,kernel_func_lung,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_lung_total,kernel_value_bone_total,eff_voxels,mat_array):
     '''
     Parameters:
     ----------
-    indices :: tuple (3) 
-      (x,y,z) indices for that voxel (with list indexing starting at 1)
+    voxel_info :: list 
+      list of dictionaries each with keys 'd' (distance spent in voxel in cm), 'indices' (the (x,y,z) indices of the voxel),
+      and 'TERMA' (the total energy released per unit mass in that voxel)
     
-    TERMA :: float
-      the TERMA for that voxel
+    voxel_array :: numpy array 
+      contains all of the (x,y,z) coordinants of all of the voxels 
     
-    energy_deposition_arrays :: list of numpy arrays 
-      list of energy_deposition arrays in order [water,lung,bone]
+    kernel_func_water :: function 
+      interpolated water kernel 
     
-    center_coor :: tuple (3)
-      coordinates of the center of the energy_deposit array
+    kernel_func_bone :: function 
+      interpolated bone kernel 
+    
+    center_coor :: tuple (3,3)
+      coordinates of the center of the kernel
+    
+    kernel_coors_mat :: list of numpy arrays
+      change of coordinates matrix from CT array coordinates to kernel coordinates
+    
+    kernel_value_water_total :: float 
+      sum of kernel water values within effective distance so that it can be normalized
+    
+    kernel_value_bone_total :: float 
+      sum of kernel bone values within effective distance so that it can be normalized
+    
+    eff_voxels :: tuple (3)
+      how far away from center in (x,y,z) does kernel have an effect (in number of CT voxels)
     
     mat_array :: numpy array 
       array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'l' for lung, 'b' for bone)
-      WARNING: if mat_array is the wrong shape it might not give an error but it will mess with results
     
     Returns:
     -------
@@ -351,88 +364,80 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
       energy deposited from that specific voxel
     
     '''
-    # print(np.shape(energy_deposition_arrays[WATER_IND]),voxel_info['indices'],center_coor)
     
-    def to_list(arr):
+    energy_deposited = []
+    kernel_value_total = 0
+    voxel_diff = ['','','']
+    
+    def kernel_func(ker_coors,CT_coors):
         '''
+        Parameters:
+        ----------
+        ker_coors :: tuple (3)
+          coordinates of the voxel with respect to the kernel 
+        
+        CT_coors :: tuple (3)
+          coordinates of the voxel with respect to the CT array
+        
+        Returns:
+        -------
+        kernel_val :: float 
+          value of the kernel at that point as a fraction of total 
         '''
-        arr = list(arr)
-        for i in range(len(arr)):
-            arr[i] = list(arr[i])
-            for j in range(len(arr[i])):
-                arr[i][j] = list(arr[i][j])
-        return arr
+        if mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'w':
+            return kernel_func_water(ker_coors)/kernel_value_water_total
+        elif mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'l':
+            return kernel_func_lung(ker_coors)/kernel_value_lung_total
+        elif mat_array[CT_coors[0]][CT_coors[1]][CT_coors[2]] == 'b':
+            return kernel_func_bone(ker_coors)/kernel_value_bone_total
     
-    if mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'w':
-        mat_ind = WATER_IND
-    elif mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'l':
-        mat_ind = LUNG_IND
-    elif mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'b':
-        mat_ind = CORT_BONE_IND
+    for n in range(len(voxel_array)):
+        voxel_diff[0] = voxel_array[n][0] - (voxel_info['indices'][0]-1)
+        voxel_diff[1] = voxel_array[n][1] - (voxel_info['indices'][1]-1)
+        voxel_diff[2] = voxel_array[n][2] - (voxel_info['indices'][2]-1)
         
-    if indices[0]-1 < center_coor[0]:
-        # print('x bottom less')
-        energy_deposited = to_list(energy_deposition_arrays[mat_ind][center_coor[0]-(indices[0]-1):])
-    elif indices[0]-1 > center_coor[0]:
-        # print('x bottom more')
-        energy_deposited = to_list(np.zeros(((indices[0]-1)-center_coor[0],len(energy_deposition_arrays[mat_ind][0]),len(energy_deposition_arrays[mat_ind][0][0])))) + to_list(energy_deposition_arrays[mat_ind])
-    else:
-        energy_deposited = to_list(energy_deposition_arrays[mat_ind])
+        if abs(voxel_diff[0]) < eff_voxels[0] and abs(voxel_diff[1]) < eff_voxels[1] and abs(voxel_diff[2]) < eff_voxels[2]:
+            kernel_diff = kernel_coors_mat.dot(voxel_diff)
+
+            kernel_value = kernel_func((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]),(voxel_array[n][0],voxel_array[n][1],voxel_array[n][2]))
+            energy_deposited.append(kernel_value * voxel_info['TERMA'])
+            
+            # if voxel_diff[0] == 0 and voxel_diff[1] == 0 and voxel_diff[2] == 0:
+            #     print(str(voxel_info['TERMA']) + '->' + str(kernel_value * voxel_info['TERMA']))
+                # print(voxel_info)
+            
+            # kernel_value_total += kernel_value
+        else:
+            energy_deposited.append(0)
     
-    if indices[1]-1 < center_coor[1]:
-        # print('y bottom less')
-        for i in range(len(energy_deposited)):
-            energy_deposited[i] = energy_deposited[i][center_coor[1]-(indices[1]-1):]
-    elif indices[1]-1 > center_coor[1]:
-        # print('y bottom more')
-        for i in range(len(energy_deposited)):
-            energy_deposited[i] = to_list(np.zeros(((indices[1]-1)-center_coor[1],len(energy_deposited[0][0])))) + energy_deposited[i]
-    
-    if indices[2]-1 < center_coor[2]:
-        # print('z bottom less')
-        for i in range(len(energy_deposited)):
-            for j in range(len(energy_deposited[i])):
-                energy_deposited[i][j] = energy_deposited[i][j][center_coor[2]-(indices[2]-1):]
-    elif indices[2]-1 > center_coor[2]:
-        # print('z bottom more')
-        for i in range(len(energy_deposited)):
-            for j in range(len(energy_deposited[i])):
-                energy_deposited[i][j] = to_list(np.zeros((indices[2]-1)-center_coor[2])) + energy_deposited[i][j]
-        
-    if (len(mat_array)-indices[0]) < center_coor[0]:
-        # print('x top less')
-        energy_deposited = energy_deposited[:-(center_coor[0]-(len(mat_array)-indices[0]))]
-    elif (len(mat_array)-indices[0]) > center_coor[0]:
-        # print('x top more')
-        energy_deposited = energy_deposited + to_list(np.zeros(((len(mat_array)-indices[0]) - center_coor[0],len(energy_deposited[0]),len(energy_deposited[0][0]))))
-        
-    if (len(mat_array[0])-indices[1]) < center_coor[1]:
-        # print('y top less')
-        for i in range(len(mat_array)):
-            energy_deposited[i] = energy_deposited[i][:-(center_coor[1]-(len(mat_array[0])-indices[1]))]
-    elif (len(mat_array[0])-indices[1]) > center_coor[1]:
-        # print('y top more')
-        for i in range(len(mat_array)):
-            energy_deposited[i] = energy_deposited[i] + to_list(np.zeros(((len(mat_array[0])-indices[1]) - center_coor[1],len(energy_deposited[0][0]))))
-        
-    if (len(mat_array[0][0])-indices[2]) < center_coor[2]:
-        # print('z top less')
-        for i in range(len(mat_array)):
-            for j in range(len(mat_array[i])):
-                energy_deposited[i][j] = energy_deposited[i][j][:-(center_coor[2]-(len(mat_array[0][0])-indices[2]))]
-    elif (len(mat_array[0][0])-indices[2]) > center_coor[2]:
-        # print('z top more')
-        for i in range(len(mat_array)):
-            for j in range(len(mat_array[i])):
-                energy_deposited[i][j] = energy_deposited[i][j] + to_list(np.zeros((len(mat_array[0][0])-indices[2]) - center_coor[2]))
-    
+    # not 100% sure it needs to be a numpy array
     energy_deposited = np.array(energy_deposited)
-    # print(type(energy_deposited),np.shape(energy_deposited))
-    energy_deposited = energy_deposited * TERMA
+    
+    # if kernel_value_total != 0:
+        # energy_deposited = energy_deposited/kernel_value_total
+        # print(energy_deposited)
+        # print('two totals' + str(kernel_value_total*kernel_value_bone_total) + str(kernel_value_bone_total))
     
     return energy_deposited
 
-# @jit
+def mask_superimpose(voxel_information):
+    '''
+    masks Superimpose() so that it can be called by Pool
+    '''
+    voxel_array = pickle.load(open('dose_calc_variables/voxel_array.pickle','rb'))
+    kernel_func_water = pickle.load(open('dose_calc_variables/kernel_func_water.pickle','rb'))
+    kernel_func_lung = pickle.load(open('dose_calc_variables/kernel_func_lung.pickle','rb'))
+    kernel_func_bone = pickle.load(open('dose_calc_variables/kernel_func_bone.pickle','rb'))
+    center_coor = pickle.load(open('dose_calc_variables/center_coor.pickle','rb'))
+    kernel_coors_mat = pickle.load(open('dose_calc_variables/kernel_coors_mat.pickle','rb'))
+    kernel_value_water_total = pickle.load(open('dose_calc_variables/kernel_value_water_total.pickle','rb'))
+    kernel_value_lung_total = pickle.load(open('dose_calc_variables/kernel_value_lung_total.pickle','rb'))
+    kernel_value_bone_total = pickle.load(open('dose_calc_variables/kernel_value_bone_total.pickle','rb'))
+    eff_voxels = pickle.load(open('dose_calc_variables/eff_voxels.pickle','rb'))
+    mat_array = pickle.load(open('dose_calc_variables/mat_array.pickle','rb'))
+    
+    return Superimpose(voxel_information,voxel_array,kernel_func_water,kernel_func_lung,kernel_func_bone,center_coor,kernel_coors_mat,kernel_value_water_total,kernel_value_lung_total,kernel_value_bone_total,eff_voxels,mat_array)
+
 def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores):
     '''
     Parameters:
@@ -525,6 +530,16 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,dz]])
     pre_rotated_ker = np.array([[kernel_info['x']['voxel_size'],0,0],[0,kernel_info['y']['voxel_size'],0],[0,0,kernel_info['z']['voxel_size']]])
     
+    pickle.dump(voxel_array,open('dose_calc_variables/voxel_array.pickle','wb'))
+    pickle.dump(kernel_func_water,open('dose_calc_variables/kernel_func_water.pickle','wb'))
+    pickle.dump(kernel_func_lung,open('dose_calc_variables/kernel_func_lung.pickle','wb'))
+    pickle.dump(kernel_func_bone,open('dose_calc_variables/kernel_func_bone.pickle','wb'))
+    pickle.dump(center_coor,open('dose_calc_variables/center_coor.pickle','wb'))
+    pickle.dump(eff_voxels,open('dose_calc_variables/eff_voxels.pickle','wb'))
+    pickle.dump(mat_array,open('dose_calc_variables/mat_array.pickle','wb'))
+    
+    p = Pool(num_cores)
+    
     for ray in range(len(voxel_info)):
         energy_deposit.append([])
         delta_x = beam_coor[ray][0][1]-beam_coor[ray][0][0]
@@ -550,40 +565,27 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
             kernel_coors_mat.append(linalg.solve(kernel_basis.T,vec))
         kernel_coors_mat = np.array(kernel_coors_mat).T
         
+        # code below until the pickle.dump is calculating the total of the kernel in order to normalize it
         num_voxel_in_eff_dist = [2*eff_distance[0]//dx,2*eff_distance[1]//dy,2*eff_distance[2]//dz]
         
-        if num_voxel_in_eff_dist[0]%2==0:
-            num_voxel_in_eff_dist[0] = num_voxel_in_eff_dist[0]+1
-        if num_voxel_in_eff_dist[1]%2==0:
-            num_voxel_in_eff_dist[1] = num_voxel_in_eff_dist[1]+1
-        if num_voxel_in_eff_dist[2]%2==0:
-            num_voxel_in_eff_dist[2] = num_voxel_in_eff_dist[2]+1
-        
-        if num_voxel_in_eff_dist[0] >= Nx:
-            num_voxel_in_eff_dist[0] = (Nx%2-1)
-        if num_voxel_in_eff_dist[1] >= Ny:
-            num_voxel_in_eff_dist[1] = (Ny%2-1)
-        if num_voxel_in_eff_dist[2] >= Nz:
-            num_voxel_in_eff_dist[2] = (Nz%2-1)
-            
-        voxel_array_for_total = np.array([[x,y,z] for x in x_voxels[:int(num_voxel_in_eff_dist[0])] for y in y_voxels[:int(num_voxel_in_eff_dist[1])] for z in z_voxels[:int(num_voxel_in_eff_dist[2])]])
+        # this makes an assumption that they're all at least close to similar (does not check cases where different)
+        if num_voxel_in_eff_dist[0] < Nx and num_voxel_in_eff_dist[1] < Ny and num_voxel_in_eff_dist[2] < Nz: 
+            voxel_array_for_total = np.array([[x,y,z] for x in x_voxels[:int(num_voxel_in_eff_dist[0])] for y in y_voxels[:int(num_voxel_in_eff_dist[1])] for z in z_voxels[:int(num_voxel_in_eff_dist[2])]])
+        else:
+            voxel_array_for_total = voxel_array
         
         kernel_value_water_total = 0
         kernel_value_lung_total = 0
         kernel_value_bone_total = 0
         
         voxel_diff = [0,0,0]
-        energy_deposition_water = []
-        energy_deposition_lung = []
-        energy_deposition_bone = []
-        
         for n in range(len(voxel_array_for_total)):
             voxel_diff[0] = voxel_array_for_total[n][0] - (num_voxel_in_eff_dist[0]//2)
             voxel_diff[1] = voxel_array_for_total[n][1] - (num_voxel_in_eff_dist[1]//2)
             voxel_diff[2] = voxel_array_for_total[n][2] - (num_voxel_in_eff_dist[2]//2)
 
             kernel_diff = kernel_coors_mat.dot(voxel_diff)
-            
+                        
             kernel_value_water = kernel_func_water((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
             kernel_value_lung = kernel_func_lung((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
             kernel_value_bone = kernel_func_bone((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
@@ -591,31 +593,25 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
             kernel_value_water_total += kernel_value_water
             kernel_value_lung_total += kernel_value_lung
             kernel_value_bone_total += kernel_value_bone
-            
-            energy_deposition_water.append(kernel_value_water)
-            energy_deposition_lung.append(kernel_value_lung)
-            energy_deposition_bone.append(kernel_value_bone)
         
-        # the center coordinates of the energy deposition arrays 
-        center_coor_en = (int(num_voxel_in_eff_dist[0]//2),int(num_voxel_in_eff_dist[1]//2),int(num_voxel_in_eff_dist[2]//2))
+        pickle.dump(kernel_value_water_total,open('dose_calc_variables/kernel_value_water_total.pickle','wb'))
+        pickle.dump(kernel_value_lung_total,open('dose_calc_variables/kernel_value_lung_total.pickle','wb'))
+        pickle.dump(kernel_value_bone_total,open('dose_calc_variables/kernel_value_bone_total.pickle','wb'))
+        pickle.dump(kernel_coors_mat,open('dose_calc_variables/kernel_coors_mat.pickle','wb'))
+                
+        energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
         
-        energy_deposition_water = np.array(energy_deposition_water)/kernel_value_water_total
-        energy_deposition_lung = np.array(energy_deposition_lung)/kernel_value_lung_total
-        energy_deposition_bone = np.array(energy_deposition_bone)/kernel_value_bone_total
+        # energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind],voxel_array,kernel_func,center_coor,(dx/kernel_info['x']['voxel_size'],dy/kernel_info['y']['voxel_size'],dz/kernel_info['z']['voxel_size'])) for voxel_ind in range(len(voxel_info[ray]))]
         
-        energy_deposition_water = energy_deposition_water.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-        energy_deposition_lung = energy_deposition_lung.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-        energy_deposition_bone = energy_deposition_bone.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-        
-        
-        energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],[energy_deposition_water,energy_deposition_lung,energy_deposition_bone],center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
-        
-        energy_deposit[ray] = np.array(np.sum(energy_deposit[ray],axis=0))
+        energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
+        print(ray)
+    p.close()
     
-    energy_deposit = np.array(np.sum(energy_deposit),axis=0)
+    energy_deposit = np.array(sum(energy_deposit))
     energy_deposit = energy_deposit.reshape(Nx-1,Ny-1,Nz-1)
     
     return energy_deposit
+    
     
 def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores):
     '''
