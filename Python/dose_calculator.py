@@ -494,10 +494,9 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     kernel_func_water = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[WATER_IND],bounds_error=False,fill_value=0)
     kernel_func_lung = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[LUNG_IND],bounds_error=False,fill_value=0)
     kernel_func_bone = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[CORT_BONE_IND],bounds_error=False,fill_value=0)
-    
-    print('Kernel Interpolated')
-    
+        
     center_coor = (int(np.floor(len(kernel_arrays[WATER_IND])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0][0])/2)))
+    # center_coor = (int(np.floor(len(kernel_arrays[WATER_IND])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0])/2)),50)
     
     # making array for labelling voxels 
     x_voxels = np.linspace(0,Nx-2,Nx-1,dtype=np.uint16)
@@ -509,7 +508,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     
     energy_deposit = []
     
-    CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,dz]])
+    CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,-dz]])
     pre_rotated_ker = np.array([[kernel_info['x']['voxel_size'],0,0],[0,kernel_info['y']['voxel_size'],0],[0,0,kernel_info['z']['voxel_size']]])
     
     for ray in range(len(voxel_info)):
@@ -518,83 +517,84 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
         delta_y = beam_coor[ray][1][1]-beam_coor[ray][1][0]
         delta_z = beam_coor[ray][2][1]-beam_coor[ray][2][0]
         
-        if delta_x == 0 and delta_y == 0 and delta_z == 0:
-            raise ValueError('Beam cannot have magnitude of 0.')
-        elif delta_x == 0 and delta_y == 0:
-            kernel_basis = pre_rotated_ker
-        elif delta_z == 0 and delta_x == 0:
-            kernel_basis = np.array([pre_rotated_ker[0],-pre_rotated_ker[2],pre_rotated_ker[1]])
-        elif delta_z == 0 and delta_y == 0:
-            kernel_basis = np.array([-pre_rotated_ker[2],pre_rotated_ker[1],pre_rotated_ker[0]])
-        else:
-            Rx = np.array([[1,0,0],[0,delta_z/np.sqrt(delta_y**2+delta_z**2),-delta_y/np.sqrt(delta_y**2+delta_z**2)],[0,delta_y/np.sqrt(delta_y**2+delta_z**2),delta_z/np.sqrt(delta_y**2+delta_z**2)]])
-            Ry = np.array([[delta_x/np.sqrt(delta_x**2+delta_z**2),0,delta_z/np.sqrt(delta_x**2+delta_z**2)],[0,1,0],[-delta_z/np.sqrt(delta_x**2+delta_z**2),0,delta_x/np.sqrt(delta_x**2+delta_z**2)]])
-            Rz = np.array([[delta_x/np.sqrt(delta_x**2+delta_y**2),-delta_y/np.sqrt(delta_x**2+delta_y**2),0],[delta_y/np.sqrt(delta_x**2+delta_y**2),delta_x/np.sqrt(delta_x**2+delta_y**2),0],[0,0,1]])
-            kernel_basis = np.array([Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[0]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[1]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[2])))])
-        
-        kernel_coors_mat = []
-        for vec in CT_basis:
-            kernel_coors_mat.append(linalg.solve(kernel_basis.T,vec))
-        kernel_coors_mat = np.array(kernel_coors_mat).T
-        
-        num_voxel_in_eff_dist = [2*eff_distance[0]//dx,2*eff_distance[1]//dy,2*eff_distance[2]//dz]
-        
-        if num_voxel_in_eff_dist[0]%2==0:
-            num_voxel_in_eff_dist[0] = num_voxel_in_eff_dist[0]+1
-        if num_voxel_in_eff_dist[1]%2==0:
-            num_voxel_in_eff_dist[1] = num_voxel_in_eff_dist[1]+1
-        if num_voxel_in_eff_dist[2]%2==0:
-            num_voxel_in_eff_dist[2] = num_voxel_in_eff_dist[2]+1
-        
-        if num_voxel_in_eff_dist[0] >= Nx:
-            num_voxel_in_eff_dist[0] = (Nx%2-1)
-        if num_voxel_in_eff_dist[1] >= Ny:
-            num_voxel_in_eff_dist[1] = (Ny%2-1)
-        if num_voxel_in_eff_dist[2] >= Nz:
-            num_voxel_in_eff_dist[2] = (Nz%2-1)
-            
-        voxel_array_for_total = np.array([[x,y,z] for x in x_voxels[:int(num_voxel_in_eff_dist[0])] for y in y_voxels[:int(num_voxel_in_eff_dist[1])] for z in z_voxels[:int(num_voxel_in_eff_dist[2])]])
-        
-        kernel_value_water_total = 0
-        kernel_value_lung_total = 0
-        kernel_value_bone_total = 0
-        
-        voxel_diff = [0,0,0]
-        energy_deposition_water = []
-        energy_deposition_lung = []
-        energy_deposition_bone = []
-        
-        for n in range(len(voxel_array_for_total)):
-            voxel_diff[0] = voxel_array_for_total[n][0] - (num_voxel_in_eff_dist[0]//2)
-            voxel_diff[1] = voxel_array_for_total[n][1] - (num_voxel_in_eff_dist[1]//2)
-            voxel_diff[2] = voxel_array_for_total[n][2] - (num_voxel_in_eff_dist[2]//2)
+        # this condition checks if it needs to remake the energy deposition arrays because the ray is at a different angle to the previous
+        if ray == 0 or delta_x!=beam_coor[ray-1][0][1]-beam_coor[ray-1][0][0] or delta_y!=beam_coor[ray-1][1][1]-beam_coor[ray-1][1][0] or delta_z!=beam_coor[ray-1][2][1]-beam_coor[ray-1][2][0]:
+            if delta_x == 0 and delta_y == 0 and delta_z == 0:
+                raise ValueError('Beam cannot have magnitude of 0.')
+            elif delta_x == 0 and delta_y == 0:
+                kernel_basis = pre_rotated_ker
+            elif delta_z == 0 and delta_x == 0:
+                kernel_basis = np.array([pre_rotated_ker[0],-pre_rotated_ker[2],pre_rotated_ker[1]])
+            elif delta_z == 0 and delta_y == 0:
+                kernel_basis = np.array([-pre_rotated_ker[2],pre_rotated_ker[1],pre_rotated_ker[0]])
+            else:
+                Rx = np.array([[1,0,0],[0,delta_z/np.sqrt(delta_y**2+delta_z**2),-delta_y/np.sqrt(delta_y**2+delta_z**2)],[0,delta_y/np.sqrt(delta_y**2+delta_z**2),delta_z/np.sqrt(delta_y**2+delta_z**2)]])
+                Ry = np.array([[delta_x/np.sqrt(delta_x**2+delta_z**2),0,delta_z/np.sqrt(delta_x**2+delta_z**2)],[0,1,0],[-delta_z/np.sqrt(delta_x**2+delta_z**2),0,delta_x/np.sqrt(delta_x**2+delta_z**2)]])
+                Rz = np.array([[delta_x/np.sqrt(delta_x**2+delta_y**2),-delta_y/np.sqrt(delta_x**2+delta_y**2),0],[delta_y/np.sqrt(delta_x**2+delta_y**2),delta_x/np.sqrt(delta_x**2+delta_y**2),0],[0,0,1]])
+                kernel_basis = np.array([Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[0]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[1]))),Rx.dot(Ry.dot(Rz.dot(pre_rotated_ker[2])))])
 
-            kernel_diff = kernel_coors_mat.dot(voxel_diff)
-            
-            kernel_value_water = kernel_func_water((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
-            kernel_value_lung = kernel_func_lung((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
-            kernel_value_bone = kernel_func_bone((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
-            
-            kernel_value_water_total += kernel_value_water
-            kernel_value_lung_total += kernel_value_lung
-            kernel_value_bone_total += kernel_value_bone
-            
-            energy_deposition_water.append(kernel_value_water)
-            energy_deposition_lung.append(kernel_value_lung)
-            energy_deposition_bone.append(kernel_value_bone)
-        
-        # the center coordinates of the energy deposition arrays 
-        center_coor_en = (int(num_voxel_in_eff_dist[0]//2),int(num_voxel_in_eff_dist[1]//2),int(num_voxel_in_eff_dist[2]//2))
-        
-        energy_deposition_water = np.array(energy_deposition_water)/kernel_value_water_total
-        energy_deposition_lung = np.array(energy_deposition_lung)/kernel_value_lung_total
-        energy_deposition_bone = np.array(energy_deposition_bone)/kernel_value_bone_total
-        
-        energy_deposition_water = energy_deposition_water.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-        energy_deposition_lung = energy_deposition_lung.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-        energy_deposition_bone = energy_deposition_bone.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-        
-        
+            kernel_coors_mat = []
+            for vec in CT_basis:
+                kernel_coors_mat.append(linalg.solve(kernel_basis.T,vec))
+            kernel_coors_mat = np.array(kernel_coors_mat).T
+
+            num_voxel_in_eff_dist = [2*eff_distance[0]//dx,2*eff_distance[1]//dy,2*eff_distance[2]//dz]
+
+            if num_voxel_in_eff_dist[0]%2==0:
+                num_voxel_in_eff_dist[0] = num_voxel_in_eff_dist[0]+1
+            if num_voxel_in_eff_dist[1]%2==0:
+                num_voxel_in_eff_dist[1] = num_voxel_in_eff_dist[1]+1
+            if num_voxel_in_eff_dist[2]%2==0:
+                num_voxel_in_eff_dist[2] = num_voxel_in_eff_dist[2]+1
+
+            if num_voxel_in_eff_dist[0] >= Nx:
+                num_voxel_in_eff_dist[0] = (Nx%2-1)
+            if num_voxel_in_eff_dist[1] >= Ny:
+                num_voxel_in_eff_dist[1] = (Ny%2-1)
+            if num_voxel_in_eff_dist[2] >= Nz:
+                num_voxel_in_eff_dist[2] = (Nz%2-1)
+
+            voxel_array_for_total = np.array([[x,y,z] for x in x_voxels[:int(num_voxel_in_eff_dist[0])] for y in y_voxels[:int(num_voxel_in_eff_dist[1])] for z in z_voxels[:int(num_voxel_in_eff_dist[2])]])
+
+            kernel_value_water_total = 0
+            kernel_value_lung_total = 0
+            kernel_value_bone_total = 0
+
+            voxel_diff = [0,0,0]
+            energy_deposition_water = []
+            energy_deposition_lung = []
+            energy_deposition_bone = []
+
+            for n in range(len(voxel_array_for_total)):
+                voxel_diff[0] = voxel_array_for_total[n][0] - (num_voxel_in_eff_dist[0]//2)
+                voxel_diff[1] = voxel_array_for_total[n][1] - (num_voxel_in_eff_dist[1]//2)
+                voxel_diff[2] = voxel_array_for_total[n][2] - (num_voxel_in_eff_dist[2]//2)
+
+                kernel_diff = kernel_coors_mat.dot(voxel_diff)
+
+                kernel_value_water = kernel_func_water((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
+                kernel_value_lung = kernel_func_lung((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
+                kernel_value_bone = kernel_func_bone((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
+
+                kernel_value_water_total += kernel_value_water
+                kernel_value_lung_total += kernel_value_lung
+                kernel_value_bone_total += kernel_value_bone
+
+                energy_deposition_water.append(kernel_value_water)
+                energy_deposition_lung.append(kernel_value_lung)
+                energy_deposition_bone.append(kernel_value_bone)
+
+            # the center coordinates of the energy deposition arrays 
+            center_coor_en = (int(num_voxel_in_eff_dist[0]//2),int(num_voxel_in_eff_dist[1]//2),int(num_voxel_in_eff_dist[2]//2))
+
+            energy_deposition_water = np.array(energy_deposition_water)/kernel_value_water_total
+            energy_deposition_lung = np.array(energy_deposition_lung)/kernel_value_lung_total
+            energy_deposition_bone = np.array(energy_deposition_bone)/kernel_value_bone_total
+
+            energy_deposition_water = energy_deposition_water.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
+            energy_deposition_lung = energy_deposition_lung.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
+            energy_deposition_bone = energy_deposition_bone.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
+                
         energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],[energy_deposition_water,energy_deposition_lung,energy_deposition_bone],center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
@@ -798,7 +798,7 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025,k
             raise ValueError('direction variable must be \'x\' or \'y\'')
     elif kind == 'trial':
         phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
-        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[4:25]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[9:20]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[4:25]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[9:20]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]]#+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]]
+        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[145:155]]#+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]]
         
     
     return beam_coors

@@ -353,16 +353,6 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
     '''
     # print(np.shape(energy_deposition_arrays[WATER_IND]),voxel_info['indices'],center_coor)
     
-    def to_list(arr):
-        '''
-        '''
-        arr = list(arr)
-        for i in range(len(arr)):
-            arr[i] = list(arr[i])
-            for j in range(len(arr[i])):
-                arr[i][j] = list(arr[i][j])
-        return arr
-    
     if mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'w':
         mat_ind = WATER_IND
     elif mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'l':
