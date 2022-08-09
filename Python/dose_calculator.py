@@ -6,6 +6,7 @@ from topas2numpy import BinnedResult
 from multiprocessing import Pool
 import pickle
 from numpy import linalg
+from os.path import exists
 
 # constants
 CORT_BONE_DENSITY = 1.92
@@ -496,7 +497,6 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     kernel_func_bone = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[CORT_BONE_IND],bounds_error=False,fill_value=0)
         
     center_coor = (int(np.floor(len(kernel_arrays[WATER_IND])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0][0])/2)))
-    # center_coor = (int(np.floor(len(kernel_arrays[WATER_IND])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0])/2)),50)
     
     # making array for labelling voxels 
     x_voxels = np.linspace(0,Nx-2,Nx-1,dtype=np.uint16)
@@ -589,7 +589,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
 
             energy_deposition_water = np.array(energy_deposition_water)/kernel_value_water_total
             energy_deposition_lung = np.array(energy_deposition_lung)/kernel_value_lung_total
-            energy_deposition_bone = np.array(energy_deposition_bone)/kernel_value_bone_total
+            energy_deposition_bone = np.array(energy_deposition_bone)/kernel_value_bone_total*1.5
 
             energy_deposition_water = energy_deposition_water.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
             energy_deposition_lung = energy_deposition_lung.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
@@ -656,7 +656,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     num_cores :: integer 
       number of cores to use 
-    
+        
     Returns:
     -------
     energy_deposit :: numpy array (Nx-1,Ny-1,Nz-1)
@@ -743,8 +743,12 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     # maybe take this out later
     kernel_arrays = []
     for kernelname in kernelnames:
-        kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
-        kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
+        if exists(kernelname + '.npy'):
+            kernel_array = np.load(kernelname + '.npy')
+        else:
+            kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
+            kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
+            np.save(kernelname,kernel_array)
         kernel_arrays.append(kernel_array)
     
     if len(kernel_arrays[WATER_IND]) != len(kernel_arrays[CORT_BONE_IND]) or len(kernel_arrays[WATER_IND][0]) != len(kernel_arrays[CORT_BONE_IND][0]) or len(kernel_arrays[WATER_IND][0][0]) != len(kernel_arrays[CORT_BONE_IND][0][0]):
@@ -798,7 +802,8 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025,k
             raise ValueError('direction variable must be \'x\' or \'y\'')
     elif kind == 'trial':
         phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
-        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[145:155]]#+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[14:16]]
-        
+        # beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[145:155]]
+        from numpy import random as rnd
+        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in rnd.normal(0,angle_spread,num_rays) if theta<=angle_spread and theta>=-angle_spread] #+ [((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in rnd.normal(0,angle_spread/2,num_rays//2)]
     
     return beam_coors
