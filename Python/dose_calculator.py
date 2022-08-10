@@ -12,12 +12,6 @@ from os.path import exists
 CORT_BONE_DENSITY = 1.92
 LUNG_DENSITY = 1.04
 
-# indexing constants for materials
-WATER_IND = 0
-LUNG_IND = 1
-CORT_BONE_IND = 2
-AIR_IND = 3
-
 def alpha_func(plane,coor1,coor2):
     '''
     plane is assumed to be already calculated
@@ -335,7 +329,7 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
       the TERMA for that voxel
     
     energy_deposition_arrays :: list of numpy arrays 
-      list of energy_deposition arrays in order [water,lung,bone]
+      list of energy_deposition arrays in same order as defined in Dose_Calculator()
     
     center_coor :: tuple (3)
       coordinates of the center of the energy_deposit array
@@ -350,15 +344,8 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
       energy deposited from that specific voxel
     
     '''
-    # print(np.shape(energy_deposition_arrays[WATER_IND]),voxel_info['indices'],center_coor)
+    mat_ind = mat_array[indices[0]-1][indices[1]-1][indices[2]-1]
     
-    if mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'w':
-        mat_ind = WATER_IND
-    elif mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'l':
-        mat_ind = LUNG_IND
-    elif mat_array[indices[0]-1][indices[1]-1][indices[2]-1] == 'b':
-        mat_ind = CORT_BONE_IND
-        
     if indices[0]-1 < center_coor[0]:
         # print('x bottom less')
         energy_deposited = energy_deposition_arrays[mat_ind][center_coor[0]-(indices[0]-1):].tolist()
@@ -416,7 +403,6 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
                 energy_deposited[i][j] = energy_deposited[i][j] + np.zeros((len(mat_array[0][0])-indices[2]) - center_coor[2]).tolist()
     
     energy_deposited = np.array(energy_deposited)
-    # print(type(energy_deposited),np.shape(energy_deposited))
     energy_deposited = energy_deposited * TERMA
     
     return energy_deposited
@@ -492,11 +478,11 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     
     eff_voxels = (eff_distance[0]/dx,eff_distance[1]/dy,eff_distance[2]/dz)
     
-    kernel_func_water = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[WATER_IND],bounds_error=False,fill_value=0)
-    kernel_func_lung = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[LUNG_IND],bounds_error=False,fill_value=0)
-    kernel_func_bone = interpolate.RegularGridInterpolator((x,y,z),kernel_arrays[CORT_BONE_IND],bounds_error=False,fill_value=0)
-        
-    center_coor = (int(np.floor(len(kernel_arrays[WATER_IND])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0])/2)),int(np.floor(len(kernel_arrays[WATER_IND][0][0])/2)))
+    kernel_funcs = []
+    for kernel_array in kernel_arrays:
+        kernel_funcs.append(interpolate.RegularGridInterpolator((x,y,z),kernel_array,bounds_error=False,fill_value=0))
+    
+    center_coor = (int(np.floor(len(kernel_arrays[0])/2)),int(np.floor(len(kernel_arrays[0][0])/2)),int(np.floor(len(kernel_arrays[0][0][0])/2)))
     
     # making array for labelling voxels 
     x_voxels = np.linspace(0,Nx-2,Nx-1,dtype=np.uint16)
@@ -510,7 +496,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     
     CT_basis = np.array([[dx,0,0],[0,dy,0],[0,0,-dz]])
     pre_rotated_ker = np.array([[kernel_info['x']['voxel_size'],0,0],[0,kernel_info['y']['voxel_size'],0],[0,0,kernel_info['z']['voxel_size']]])
-    
+        
     for ray in range(len(voxel_info)):
         energy_deposit.append([])
         delta_x = beam_coor[ray][0][1]-beam_coor[ray][0][0]
@@ -555,15 +541,13 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
                 num_voxel_in_eff_dist[2] = (Nz%2-1)
 
             voxel_array_for_total = np.array([[x,y,z] for x in x_voxels[:int(num_voxel_in_eff_dist[0])] for y in y_voxels[:int(num_voxel_in_eff_dist[1])] for z in z_voxels[:int(num_voxel_in_eff_dist[2])]])
-
-            kernel_value_water_total = 0
-            kernel_value_lung_total = 0
-            kernel_value_bone_total = 0
+            
+            kernel_total_values = list(np.zeros(len(kernel_arrays)))
 
             voxel_diff = [0,0,0]
-            energy_deposition_water = []
-            energy_deposition_lung = []
-            energy_deposition_bone = []
+            energy_depositions = []
+            for k in kernel_total_values:
+                energy_depositions.append([])
 
             for n in range(len(voxel_array_for_total)):
                 voxel_diff[0] = voxel_array_for_total[n][0] - (num_voxel_in_eff_dist[0]//2)
@@ -571,31 +555,23 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
                 voxel_diff[2] = voxel_array_for_total[n][2] - (num_voxel_in_eff_dist[2]//2)
 
                 kernel_diff = kernel_coors_mat.dot(voxel_diff)
+                
+                for kernel_func_ind in range(len(kernel_funcs)):
+                    kernel_value = kernel_funcs[kernel_func_ind]((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
 
-                kernel_value_water = kernel_func_water((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
-                kernel_value_lung = kernel_func_lung((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
-                kernel_value_bone = kernel_func_bone((center_coor[0]+kernel_diff[0],center_coor[1]+kernel_diff[1],center_coor[2]+kernel_diff[2]))
+                    kernel_total_values[kernel_func_ind] += kernel_value
 
-                kernel_value_water_total += kernel_value_water
-                kernel_value_lung_total += kernel_value_lung
-                kernel_value_bone_total += kernel_value_bone
-
-                energy_deposition_water.append(kernel_value_water)
-                energy_deposition_lung.append(kernel_value_lung)
-                energy_deposition_bone.append(kernel_value_bone)
+                    energy_depositions[kernel_func_ind].append(kernel_value)
 
             # the center coordinates of the energy deposition arrays 
             center_coor_en = (int(num_voxel_in_eff_dist[0]//2),int(num_voxel_in_eff_dist[1]//2),int(num_voxel_in_eff_dist[2]//2))
+            
+            for index in range(len(energy_depositions)):
+                energy_depositions[index] = np.array(energy_depositions[index])/kernel_total_values[index]
 
-            energy_deposition_water = np.array(energy_deposition_water)/kernel_value_water_total
-            energy_deposition_lung = np.array(energy_deposition_lung)/kernel_value_lung_total
-            energy_deposition_bone = np.array(energy_deposition_bone)/kernel_value_bone_total*1.5
-
-            energy_deposition_water = energy_deposition_water.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-            energy_deposition_lung = energy_deposition_lung.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-            energy_deposition_bone = energy_deposition_bone.reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-                
-        energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],[energy_deposition_water,energy_deposition_lung,energy_deposition_bone],center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
+                energy_depositions[index] = energy_depositions[index].reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
+        
+        energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],energy_depositions,center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
         print(ray)
@@ -605,7 +581,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     
     return energy_deposit
     
-def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores):
+def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,densities,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores):
     '''
     Parameters:
     ----------
@@ -634,15 +610,18 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     position_spread :: tuple (3)
       position spread of beam in (x,y,z) in cm
     
+    densities :: list of float
+      list of densities of materials in same order as filenames and kernelnames parameters
+    
     filenames :: list of str 
-      list of name of the file that contains values for energy absorption coefficients in order of [water,lung,bone]
+      list of name of the file that contains values for energy absorption coefficients in same order as densities and kernelnames parameters
     
     kernelnames :: list of str
-      list of name or pathway of file from TOPAS that contains kernel information in order of [water,lung,bone]
+      list of name or pathway of file from TOPAS that contains kernel information in same order as densities and filenames parameters
       NOTE: kernels must have the same dimensions and number of bins in each direction
     
     kernel_size :: tuple (3)
-      (x,y,z) dimensions of the kernel in cm 
+      (x,y,z) dimensions of the kernels in cm 
     
     beam_coor :: list of tuples (3,2)
       list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
@@ -652,10 +631,10 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       how far away from center in (x,y,z) does kernel have an effect (in cm)
     
     mat_array :: numpy array 
-      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel ('w' for water, 'l' for lung, 'b' for bone)
+      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel by index of place of material in densities, kernelnames, and filenames, with indexing starting at 0 
     
     num_cores :: integer 
-      number of cores to use 
+      number of cores to use (currently has no effect but I'm keeping this parameter in case I add multiprocessing back in)
         
     Returns:
     -------
@@ -663,20 +642,13 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
-    # making mu interpolation function for water
-    coeff_array = np.loadtxt(filenames[WATER_IND],skiprows=2,dtype=float)
-    mu_linear_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
-    mu_mass_water = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
+    mu_linear = []
+    mu_mass = []
     
-    # making mu interpolation function for lung
-    coeff_array = np.loadtxt(filenames[LUNG_IND],skiprows=2,dtype=float)
-    mu_linear_lung = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
-    mu_mass_lung = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
-    
-    # making mu interpolation function for bone
-    coeff_array = np.loadtxt(filenames[CORT_BONE_IND],skiprows=2,dtype=float)
-    mu_linear_bone = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate')
-    mu_mass_bone = interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate')
+    for material_name in filenames:
+        coeff_array = np.loadtxt(material_name,skiprows=2,dtype=float)
+        mu_linear.append(interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate'))
+        mu_mass.append(interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate'))
     
     def mu(energy,voxel_index,kind):
         '''
@@ -701,35 +673,19 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
 
         '''
         # exponential interpolation
-        
-        if mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1] == 'w':
-            if kind == 'l':
-                return np.exp(mu_linear_water(np.log(energy)))
-            elif kind == 'm':
-                return np.exp(mu_mass_water(np.log(energy)))
-            else:
-                raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
-        elif mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1] == 'l':
-            if kind == 'l':
-                return np.exp(mu_linear_lung(np.log(energy)))*LUNG_DENSITY
-            elif kind == 'm':
-                return np.exp(mu_mass_lung(np.log(energy)))
-            else:
-                raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
-        elif mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1] == 'b':
-            if kind == 'l':
-                return np.exp(mu_linear_bone(np.log(energy)))*CORT_BONE_DENSITY
-            elif kind == 'm':
-                return np.exp(mu_mass_bone(np.log(energy)))
-            else:
-                raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
+        if kind == 'l':
+            return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]]
+        elif kind == 'm':
+            return np.exp(mu_mass[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))
+        else:
+            raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
     
     voxel_info = []
     
     beam_energy = np.array(beam_energy)
     ini_fluence = np.array(ini_fluence)
     
-    # this is temporary for the case I'm working on rn
+    # this is temporary for the fan beam case I'm working on rn
     if angle_spread[1] != 0:
         ini_fluence = ini_fluence*np.pi*position_spread[0]*position_spread[1]
         ini_fluence = ini_fluence/(2*angle_spread[1]*position_spread[0])
@@ -738,9 +694,8 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
             raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
         voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu))
-        
-    # I don't think I really need to do this anymore... but it kinda keeps it clean so idk
-    # maybe take this out later
+    
+    # I like having already as a percent of max but I know that it doesn't need to be 
     kernel_arrays = []
     for kernelname in kernelnames:
         if exists(kernelname + '.npy'):
@@ -751,8 +706,9 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
             np.save(kernelname,kernel_array)
         kernel_arrays.append(kernel_array)
     
-    if len(kernel_arrays[WATER_IND]) != len(kernel_arrays[CORT_BONE_IND]) or len(kernel_arrays[WATER_IND][0]) != len(kernel_arrays[CORT_BONE_IND][0]) or len(kernel_arrays[WATER_IND][0][0]) != len(kernel_arrays[CORT_BONE_IND][0][0]):
-        raise ValueError('Both water and bone kernel must have same dimensions and number of bins.')
+    for index in range(len(kernel_arrays)):
+        if index!=0 and np.shape(kernel_arrays[index])!=np.shape(kernel_arrays[index-1]):
+            raise ValueError('All kernels must have same dimensions and number of bins.')
     
     print('Calling Superposition')
     
