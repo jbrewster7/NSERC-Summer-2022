@@ -49,14 +49,17 @@ b:Ts/ShowCPUTime = "True"
 
 s:Sc/TestingDose9_Lung/Quantity = "DoseToMedium"
 s:Sc/TestingDose9_Lung/Component = "Lung"
+sv:Sc/TestingDose9_Lung/Report = 2 "Sum" "Standard_Deviation"
 s:Sc/TestingDose9_Lung/IfOutputFileAlreadyExists = "Overwrite"
 
 s:Sc/TestingDose9_Bone/Quantity = "DoseToMedium"
 s:Sc/TestingDose9_Bone/Component = "Bone"
+sv:Sc/TestingDose9_Bone/Report = 2 "Sum" "Standard_Deviation"
 s:Sc/TestingDose9_Bone/IfOutputFileAlreadyExists = "Overwrite"
 
 s:Sc/TestingDose9_Water/Quantity = "DoseToMedium"
 s:Sc/TestingDose9_Water/Component = "Water"
+sv:Sc/TestingDose9_Water/Report = 2 "Sum" "Standard_Deviation"
 s:Sc/TestingDose9_Water/IfOutputFileAlreadyExists = "Overwrite"
 
 #Ts/UseQt = "True"
