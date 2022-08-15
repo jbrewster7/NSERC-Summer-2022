@@ -8,10 +8,6 @@ import pickle
 from numpy import linalg
 from os.path import exists
 
-# constants
-CORT_BONE_DENSITY = 1.92
-LUNG_DENSITY = 1.04
-
 def alpha_func(plane,coor1,coor2):
     '''
     plane is assumed to be already calculated
@@ -402,7 +398,7 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
             for j in range(len(mat_array[i])):
                 energy_deposited[i][j] = energy_deposited[i][j] + np.zeros((len(mat_array[0][0])-indices[2]) - center_coor[2]).tolist()
     
-    energy_deposited = np.array(energy_deposited)
+    energy_deposited = np.array(energy_deposited,dtype=np.float32)
     energy_deposited = energy_deposited * TERMA
     
     return energy_deposited
@@ -481,7 +477,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     kernel_funcs = []
     for kernel_array in kernel_arrays:
         kernel_funcs.append(interpolate.RegularGridInterpolator((x,y,z),kernel_array,bounds_error=False,fill_value=0))
-    
+        
     center_coor = (int(np.floor(len(kernel_arrays[0])/2)),int(np.floor(len(kernel_arrays[0][0])/2)),int(np.floor(len(kernel_arrays[0][0][0])/2)))
     
     # making array for labelling voxels 
@@ -571,6 +567,8 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
 
                 energy_depositions[index] = energy_depositions[index].reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
         
+        print('Calling Superimpose')
+        
         energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],energy_depositions,center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
@@ -610,8 +608,9 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     position_spread :: tuple (3)
       position spread of beam in (x,y,z) in cm
     
-    densities :: list of float
-      list of densities of materials in same order as filenames and kernelnames parameters
+    densities :: list of float or numpy array
+      list of densities of materials either in 1D list in same order as filenames and kernelnames parameters,
+      or numpy array in same shape as mat_array
     
     filenames :: list of str 
       list of name of the file that contains values for energy absorption coefficients in same order as densities and kernelnames parameters
@@ -630,8 +629,9 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     eff_distance :: tuple (3)
       how far away from center in (x,y,z) does kernel have an effect (in cm)
     
-    mat_array :: numpy array 
+    mat_array :: numpy array of integers
       array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel by index of place of material in densities, kernelnames, and filenames, with indexing starting at 0 
+      NOTE: DTYPE MUST BE INTEGERS NOT FLOATS
     
     num_cores :: integer 
       number of cores to use (currently has no effect but I'm keeping this parameter in case I add multiprocessing back in)
@@ -642,14 +642,27 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
+    if mat_array.dtype not in (int,np.int8,np.int16,np.int32,np.int64,np.uint8,np.uint16,np.uint32,np.uint64):
+        raise ValueError('dtype of \'mat_array\' must be type of integer not float')
+    
+    if len(kernelnames) != len(filenames):
+        raise ValueError('\'filenames\' and \'kernelnames\' parameters must have the same number of items')
+    
+    if np.shape(np.array(densities)) == np.shape(np.array(mat_array)):
+        den_array = True
+    elif np.shape(np.array(densities)) == np.shape(np.array(filenames)):
+        den_array = False
+    else:
+        raise ValueError('\'densities\' parameter must be the same shape as \'mat_array\' or \'filenames\' and \'kernelnames\'')
+    
+    
     mu_linear = []
     mu_mass = []
-    
     for material_name in filenames:
         coeff_array = np.loadtxt(material_name,skiprows=2,dtype=float)
         mu_linear.append(interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[1]),kind='linear',fill_value='extrapolate'))
         mu_mass.append(interpolate.interp1d(np.log(coeff_array.T[0]),np.log(coeff_array.T[2]),kind='linear',fill_value='extrapolate'))
-    
+        
     def mu(energy,voxel_index,kind):
         '''
         This is currently only set-up for water, lung, and cortical bone, will update later.
@@ -674,7 +687,10 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         '''
         # exponential interpolation
         if kind == 'l':
-            return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]]
+            if den_array:
+                return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]
+            else:
+                return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]]
         elif kind == 'm':
             return np.exp(mu_mass[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))
         else:
@@ -743,6 +759,11 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025,k
       list contains one tuple for each ray
     
     '''
+    def Gaussian(x,mu,sigma):
+        '''
+        '''
+        return np.exp(-0.5*((x-mu)/sigma)**2)/(sigma*np.sqrt(2*np.pi))
+    
     delta_z = beam_coor[2][1] - beam_coor[2][0]
     if kind == 'linear':
         if direction == 'x':
@@ -756,6 +777,36 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025,k
             beam_coors = [((beam_coors_1[len(beam_coors_1)-1-index][0][0],beam_coors_1[len(beam_coors_1)-1-index][0][1]),(beam_coors_1[len(beam_coors_1)-1-index][1][0]+adjust*((index-(len(beam_coors_1)-1)/2)*2/(len(beam_coors_1)-1)),beam_coors_1[len(beam_coors_1)-1-index][1][1]+adjust*((index-(len(beam_coors_1)-1)/2)*2/(len(beam_coors_1)-1))),(beam_coors_1[len(beam_coors_1)-1-index][2][0],beam_coors_1[len(beam_coors_1)-1-index][2][1])) for index in range(len(beam_coors_1))] + [((beam_coors_2[len(beam_coors_2)-1-index][0][0],beam_coors_2[len(beam_coors_2)-1-index][0][1]),(beam_coors_2[len(beam_coors_2)-1-index][1][0]+adjust*((index-(len(beam_coors_2)-1)/2)*2/(len(beam_coors_2)-1)),beam_coors_2[len(beam_coors_2)-1-index][1][1]+adjust*((index-(len(beam_coors_2)-1)/2)*2/(len(beam_coors_2)-1))),(beam_coors_2[len(beam_coors_2)-1-index][2][0],beam_coors_2[len(beam_coors_2)-1-index][2][1])) for index in range(len(beam_coors_2))]
         else:
             raise ValueError('direction variable must be \'x\' or \'y\'')
+            
+    elif kind == 'gaussian':
+        phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
+        angle_spread/np.exp(num_rays//4)
+        beam_coors = []
+        
+        # base = np.exp(1/(2*angle_spread**2))/(angle_spread*np.sqrt(2*np.pi))
+        base = 1.5
+        
+        # this will make everything out of order but that's fine
+        for n in range(num_rays//4):
+            beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
+            beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(-base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
+            beam_coors.append(((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
+            beam_coors.append(((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(-base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
+        
+        beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(phi)),(beam_coor[2][0],beam_coor[2][1])))
+        beam_coors.append(((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(phi)),(beam_coor[2][0],beam_coor[2][1])))
+        
+        
+#         number_rays = Gaussian(np.linspace(-angle_spread,angle_spread,num_rays//8),0,angle_spread)
+#         number_rays = (num_rays/np.sum(number_rays))*number_rays
+#         number_rays = np.array(np.ceil(number_rays),dtype=int)
+#         print(number_rays)
+        
+#         beam_coors = []
+#         for index in range(len(np.linspace(-angle_spread,angle_spread,num_rays//8))):
+#             for n in range(number_rays[index]):
+#                 beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(np.linspace(-angle_spread,angle_spread,num_rays//8)[index]+phi)),(beam_coor[2][0],beam_coor[2][1])))
+            
     elif kind == 'trial':
         phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
         # beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[145:155]]
