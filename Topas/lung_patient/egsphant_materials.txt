@@ -1,0 +1,50 @@
+sv:Ma/XCAT_G4_AIR_LD_ICRP_low/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_AIR_LD_ICRP_low/Fractions = 9 0.105 0.083 0.023 0.779 0.002 0.001 0.002 0.003 0.002
+d:Ma/XCAT_G4_AIR_LD_ICRP_low/Density = 0.033 g/cm3 
+s:Ma/XCAT_G4_AIR_LD_ICRP_low/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_LUNG_LD_ICRP_low/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_LUNG_LD_ICRP_low/Fractions = 9 0.105 0.083 0.023 0.779 0.002 0.001 0.002 0.003 0.002
+d:Ma/XCAT_G4_LUNG_LD_ICRP_low/Density = 0.155 g/cm3 
+s:Ma/XCAT_G4_LUNG_LD_ICRP_low/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_LUNG_LD_ICRP_med/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_LUNG_LD_ICRP_med/Fractions = 9 0.105 0.083 0.023 0.779 0.002 0.001 0.002 0.003 0.002
+d:Ma/XCAT_G4_LUNG_LD_ICRP_med/Density = 0.223 g/cm3 
+s:Ma/XCAT_G4_LUNG_LD_ICRP_med/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_LUNG_LD_ICRP_top/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_LUNG_LD_ICRP_top/Fractions = 9 0.105 0.083 0.023 0.779 0.002 0.001 0.002 0.003 0.002
+d:Ma/XCAT_G4_LUNG_LD_ICRP_top/Density = 0.412 g/cm3 
+s:Ma/XCAT_G4_LUNG_LD_ICRP_top/DefaultColor = "orange"
+
+sv:Ma/XCAT_RIB_BONE_ICRP_low/Components = 11 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Magnesium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium"
+uv:Ma/XCAT_RIB_BONE_ICRP_low/Fractions = 11 0.064 0.263 0.039 0.436 0.001 0.001 0.06 0.003 0.001 0.001 0.131
+d:Ma/XCAT_RIB_BONE_ICRP_low/Density = 1.12 g/cm3 
+s:Ma/XCAT_RIB_BONE_ICRP_low/DefaultColor = "white"
+
+sv:Ma/XCAT_RIB_BONE_ICRP_med/Components = 11 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Magnesium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium"
+uv:Ma/XCAT_RIB_BONE_ICRP_med/Fractions = 11 0.064 0.263 0.039 0.436 0.001 0.001 0.06 0.003 0.001 0.001 0.131
+d:Ma/XCAT_RIB_BONE_ICRP_med/Density = 1.17 g/cm3 
+s:Ma/XCAT_RIB_BONE_ICRP_med/DefaultColor = "white"
+
+sv:Ma/XCAT_RIB_BONE_ICRP_top/Components = 11 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Magnesium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium"
+uv:Ma/XCAT_RIB_BONE_ICRP_top/Fractions = 11 0.064 0.263 0.039 0.436 0.001 0.001 0.06 0.003 0.001 0.001 0.131
+d:Ma/XCAT_RIB_BONE_ICRP_top/Density = 1.345 g/cm3 
+s:Ma/XCAT_RIB_BONE_ICRP_top/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_low/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_low/Fractions = 9 0.102 0.143 0.034 0.71 0.001 0.002 0.003 0.001 0.004
+d:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_low/Density = 0.919 g/cm3 
+s:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_low/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_med/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_med/Fractions = 9 0.102 0.143 0.034 0.71 0.001 0.002 0.003 0.001 0.004
+d:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_med/Density = 0.996 g/cm3 
+s:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_med/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_top/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_top/Fractions = 9 0.102 0.143 0.034 0.71 0.001 0.002 0.003 0.001 0.004
+d:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_top/Density = 1.08 g/cm3 
+s:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP_top/DefaultColor = "skyblue"
+

@@ -1,0 +1,864 @@
+sv:Ma/XCAT_G4_ACETONE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_ACETONE/Fractions = 3 0.104122 0.620405 0.275473
+d:Ma/XCAT_G4_ACETONE/Density = 0.7899 g/cm3 
+s:Ma/XCAT_G4_ACETONE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_ACETYLENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_ACETYLENE/Fractions = 2 0.077418 0.922582
+d:Ma/XCAT_G4_ACETYLENE/Density = 0.0010967 g/cm3 
+s:Ma/XCAT_G4_ACETYLENE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP/Components = 7 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Sulfur" "Chlorine"
+uv:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP/Fractions = 7 0.114 0.598 0.007 0.278 0.001 0.001 0.001
+d:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP/Density = 0.95 g/cm3 
+s:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP2/Components = 7 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Sulfur" "Chlorine"
+uv:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP2/Fractions = 7 0.116 0.681 0.002 0.198 0.001 0.001 0.001
+d:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP2/Density = 0.93 g/cm3 
+s:Ma/XCAT_G4_ADIPOSE_TISSUE_ICRP2/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_ADIPOSE_TISSUE_ICRP/Components = 7 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Sulfur" "Chlorine"
+uv:Ma/XCAT_ADIPOSE_TISSUE_ICRP/Fractions = 7 0.116 0.681 0.002 0.198 0.001 0.001 0.001
+d:Ma/XCAT_ADIPOSE_TISSUE_ICRP/Density = 0.93 g/cm3 
+s:Ma/XCAT_ADIPOSE_TISSUE_ICRP/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_AIR/Components = 4 "Carbon" "Nitrogen" "Oxygen" "Argon"
+uv:Ma/XCAT_G4_AIR/Fractions = 4 0.000124 0.755267 0.231781 0.012827
+d:Ma/XCAT_G4_AIR/Density = 0.00120479 g/cm3 
+s:Ma/XCAT_G4_AIR/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_ALANINE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_ALANINE/Fractions = 4 0.07919 0.404439 0.157213 0.359159
+d:Ma/XCAT_G4_ALANINE/Density = 1.42 g/cm3 
+s:Ma/XCAT_G4_ALANINE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_ALUMINUM_OXIDE/Components = 2 "Oxygen" "Aluminum"
+uv:Ma/XCAT_G4_ALUMINUM_OXIDE/Fractions = 2 0.470749 0.529251
+d:Ma/XCAT_G4_ALUMINUM_OXIDE/Density = 3.97 g/cm3 
+s:Ma/XCAT_G4_ALUMINUM_OXIDE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_AMBER/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_AMBER/Fractions = 3 0.10593 0.788973 0.105096
+d:Ma/XCAT_G4_AMBER/Density = 1.1 g/cm3 
+s:Ma/XCAT_G4_AMBER/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_AMMONIA/Components = 2 "Hydrogen" "Nitrogen"
+uv:Ma/XCAT_G4_AMMONIA/Fractions = 2 0.177547 0.822453
+d:Ma/XCAT_G4_AMMONIA/Density = 0.000826019 g/cm3 
+s:Ma/XCAT_G4_AMMONIA/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_ANILINE/Components = 3 "Hydrogen" "Carbon" "Nitrogen"
+uv:Ma/XCAT_G4_ANILINE/Fractions = 3 0.075759 0.773838 0.150403
+d:Ma/XCAT_G4_ANILINE/Density = 1.0235 g/cm3 
+s:Ma/XCAT_G4_ANILINE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_ANTHRACENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_ANTHRACENE/Fractions = 2 0.05655 0.94345
+d:Ma/XCAT_G4_ANTHRACENE/Density = 1.283 g/cm3 
+s:Ma/XCAT_G4_ANTHRACENE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_BAKELITE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_BAKELITE/Fractions = 3 0.057441 0.774591 0.167968
+d:Ma/XCAT_G4_BAKELITE/Density = 1.25 g/cm3 
+s:Ma/XCAT_G4_BAKELITE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_BARIUM_FLUORIDE/Components = 2 "Fluorine" "Barium"
+uv:Ma/XCAT_G4_BARIUM_FLUORIDE/Fractions = 2 0.21672 0.78328
+d:Ma/XCAT_G4_BARIUM_FLUORIDE/Density = 4.89 g/cm3 
+s:Ma/XCAT_G4_BARIUM_FLUORIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_BARIUM_SULFATE/Components = 3 "Oxygen" "Sulfur" "Barium"
+uv:Ma/XCAT_G4_BARIUM_SULFATE/Fractions = 3 0.274212 0.137368 0.58842
+d:Ma/XCAT_G4_BARIUM_SULFATE/Density = 4.5 g/cm3 
+s:Ma/XCAT_G4_BARIUM_SULFATE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_BENZENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_BENZENE/Fractions = 2 0.077418 0.922582
+d:Ma/XCAT_G4_BENZENE/Density = 0.87865 g/cm3 
+s:Ma/XCAT_G4_BENZENE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_BERYLLIUM_OXIDE/Components = 2 "Beryllium" "Oxygen"
+uv:Ma/XCAT_G4_BERYLLIUM_OXIDE/Fractions = 2 0.36032 0.63968
+d:Ma/XCAT_G4_BERYLLIUM_OXIDE/Density = 3.01 g/cm3 
+s:Ma/XCAT_G4_BERYLLIUM_OXIDE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_BGO/Components = 3 "Oxygen" "Germanium" "Bismuth"
+uv:Ma/XCAT_G4_BGO/Fractions = 3 0.154126 0.17482 0.671054
+d:Ma/XCAT_G4_BGO/Density = 7.13 g/cm3 
+s:Ma/XCAT_G4_BGO/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_BLOOD_ICRP/Components = 10 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Iron"
+uv:Ma/XCAT_G4_BLOOD_ICRP/Fractions = 10 0.102 0.11 0.033 0.745 0.001 0.001 0.002 0.003 0.002 0.001
+d:Ma/XCAT_G4_BLOOD_ICRP/Density = 1.06 g/cm3 
+s:Ma/XCAT_G4_BLOOD_ICRP/DefaultColor = "orange"
+
+sv:Ma/XCAT_D6_Vertebra_ICRP/Components = 11 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium" "Iron"
+uv:Ma/XCAT_D6_Vertebra_ICRP/Fractions = 11 0.07 0.287 0.038 0.437 0.001 0.051 0.002 0.001 0.001 0.111 0.001
+d:Ma/XCAT_D6_Vertebra_ICRP/Density = 1.33 g/cm3 
+s:Ma/XCAT_D6_Vertebra_ICRP/DefaultColor = "yellow"
+
+sv:Ma/XCAT_C4_Vertebra_ICRP/Components = 10 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium"
+uv:Ma/XCAT_C4_Vertebra_ICRP/Fractions = 10 0.063 0.261 0.039 0.436 0.002 0.061 0.003 0.001 0.001 0.133
+d:Ma/XCAT_C4_Vertebra_ICRP/Density = 1.42 g/cm3 
+s:Ma/XCAT_C4_Vertebra_ICRP/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_RIB_BONE_ICRP/Components = 11 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Magnesium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium"
+uv:Ma/XCAT_RIB_BONE_ICRP/Fractions = 11 0.064 0.263 0.039 0.436 0.001 0.001 0.06 0.003 0.001 0.001 0.131
+d:Ma/XCAT_RIB_BONE_ICRP/Density = 1.41 g/cm3 
+s:Ma/XCAT_RIB_BONE_ICRP/DefaultColor = "white"
+
+sv:Ma/XCAT_HEART_ICRP/Components = 10 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Iron"
+uv:Ma/XCAT_HEART_ICRP/Fractions = 10 0.103 0.121 0.032 0.734 0.001 0.001 0.002 0.003 0.002 0.001
+d:Ma/XCAT_HEART_ICRP/Density = 1.05 g/cm3 
+s:Ma/XCAT_HEART_ICRP/DefaultColor = "grey"
+
+sv:Ma/XCAT_KIDNEY_ICRP/Components = 10 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium"
+uv:Ma/XCAT_KIDNEY_ICRP/Fractions = 10 0.103 0.132 0.03 0.724 0.002 0.002 0.002 0.002 0.002 0.001
+d:Ma/XCAT_KIDNEY_ICRP/Density = 1.05 g/cm3 
+s:Ma/XCAT_KIDNEY_ICRP/DefaultColor = "green"
+
+sv:Ma/XCAT_LIVER_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_LIVER_ICRP/Fractions = 9 0.102 0.139 0.03 0.716 0.002 0.003 0.003 0.002 0.003
+d:Ma/XCAT_LIVER_ICRP/Density = 1.06 g/cm3 
+s:Ma/XCAT_LIVER_ICRP/DefaultColor = "red"
+
+sv:Ma/XCAT_LYMPH_ICRP/Components = 7 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Sulfur" "Chlorine"
+uv:Ma/XCAT_LYMPH_ICRP/Fractions = 7 0.108 0.041 0.011 0.832 0.003 0.001 0.004
+d:Ma/XCAT_LYMPH_ICRP/Density = 1.03 g/cm3 
+s:Ma/XCAT_LYMPH_ICRP/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_PANCREAS_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_PANCREAS_ICRP/Fractions = 9 0.106 0.169 0.022 0.694 0.002 0.002 0.001 0.002 0.002
+d:Ma/XCAT_PANCREAS_ICRP/Density = 1.04 g/cm3 
+s:Ma/XCAT_PANCREAS_ICRP/DefaultColor = "blue"
+
+sv:Ma/XCAT_INTESTINE_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_INTESTINE_ICRP/Fractions = 9 0.106 0.115 0.022 0.751 0.001 0.001 0.001 0.002 0.001
+d:Ma/XCAT_INTESTINE_ICRP/Density = 1.03 g/cm3 
+s:Ma/XCAT_INTESTINE_ICRP/DefaultColor = "orange"
+
+sv:Ma/XCAT_SKULL_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Magnesium" "Phosphorus" "Sulfur" "Calcium"
+uv:Ma/XCAT_SKULL_ICRP/Fractions = 9 0.05 0.212 0.04 0.435 0.001 0.002 0.081 0.003 0.176
+d:Ma/XCAT_SKULL_ICRP/Density = 1.61 g/cm3 
+s:Ma/XCAT_SKULL_ICRP/DefaultColor = "yellow"
+
+sv:Ma/XCAT_CARTILAGE_ICRP/Components = 8 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine"
+uv:Ma/XCAT_CARTILAGE_ICRP/Fractions = 8 0.096 0.099 0.022 0.744 0.005 0.022 0.009 0.003
+d:Ma/XCAT_CARTILAGE_ICRP/Density = 1.1 g/cm3 
+s:Ma/XCAT_CARTILAGE_ICRP/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_SPLEEN_ICRP/Components = 10 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Gold"
+uv:Ma/XCAT_SPLEEN_ICRP/Fractions = 10 0.10 0.11 0.032 0.677 0.001 0.003 0.002 0.002 0.003 0.07
+d:Ma/XCAT_SPLEEN_ICRP/Density = 1.16 g/cm3 
+s:Ma/XCAT_SPLEEN_ICRP/DefaultColor = "white"
+
+sv:Ma/XCAT_OVARY_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_OVARY_ICRP/Fractions = 9 0.105 0.093 0.024 0.768 0.002 0.002 0.002 0.002 0.002
+d:Ma/XCAT_OVARY_ICRP/Density = 1.05 g/cm3 
+s:Ma/XCAT_OVARY_ICRP/DefaultColor = "grey"
+
+sv:Ma/XCAT_RED_MARROW_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Iron"
+uv:Ma/XCAT_RED_MARROW_ICRP/Fractions = 9 0.105 0.414 0.034 0.439 0.001 0.002 0.002 0.002 0.001
+d:Ma/XCAT_RED_MARROW_ICRP/Density = 1.03 g/cm3 
+s:Ma/XCAT_RED_MARROW_ICRP/DefaultColor = "green"
+
+sv:Ma/XCAT_YELLOW_MARROW_ICRP/Components = 7 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Sulfur" "Chlorine"
+uv:Ma/XCAT_YELLOW_MARROW_ICRP/Fractions = 7 0.115 0.644 0.007 0.231 0.001 0.001 0.001
+d:Ma/XCAT_YELLOW_MARROW_ICRP/Density = 0.98 g/cm3 
+s:Ma/XCAT_YELLOW_MARROW_ICRP/DefaultColor = "red"
+
+sv:Ma/XCAT_THYROID_ICRP/Components = 10 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Iodine"
+uv:Ma/XCAT_THYROID_ICRP/Fractions = 10 0.104 0.119 0.024 0.745 0.002 0.001 0.001 0.002 0.001 0.001
+d:Ma/XCAT_THYROID_ICRP/Density = 1.42 g/cm3 
+s:Ma/XCAT_THYROID_ICRP/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_BLADDER_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_BLADDER_ICRP/Fractions = 9 0.105 0.096 0.026 0.761 0.002 0.002 0.002 0.003 0.003
+d:Ma/XCAT_BLADDER_ICRP/Density = 1.42 g/cm3 
+s:Ma/XCAT_BLADDER_ICRP/DefaultColor = "blue"
+
+sv:Ma/XCAT_Spongiosa_Bone_ICRP/Components = 11 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Calcium" "Iron"
+uv:Ma/XCAT_Spongiosa_Bone_ICRP/Fractions = 11 0.063 0.404 0.028 0.367 0.002 0.034 0.002 0.002 0.001 0.074 0.001
+d:Ma/XCAT_Spongiosa_Bone_ICRP/Density = 1.18 g/cm3 
+s:Ma/XCAT_Spongiosa_Bone_ICRP/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_BONE_COMPACT_ICRU/Components = 8 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Magnesium" "Phosphorus" "Sulfur" "Calcium"
+uv:Ma/XCAT_G4_BONE_COMPACT_ICRU/Fractions = 8 0.064 0.278 0.027 0.41 0.002 0.07 0.002 0.147
+d:Ma/XCAT_G4_BONE_COMPACT_ICRU/Density = 1.85 g/cm3 
+s:Ma/XCAT_G4_BONE_COMPACT_ICRU/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_BONE_CORTICAL_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Magnesium" "Phosphorus" "Sulfur" "Calcium"
+uv:Ma/XCAT_G4_BONE_CORTICAL_ICRP/Fractions = 9 0.034 0.155 0.042 0.435 0.001 0.002 0.103 0.003 0.225
+d:Ma/XCAT_G4_BONE_CORTICAL_ICRP/Density = 1.92 g/cm3 
+s:Ma/XCAT_G4_BONE_CORTICAL_ICRP/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_BORON_CARBIDE/Components = 2 "Boron" "Carbon"
+uv:Ma/XCAT_G4_BORON_CARBIDE/Fractions = 2 0.78261 0.21739
+d:Ma/XCAT_G4_BORON_CARBIDE/Density = 2.52 g/cm3 
+s:Ma/XCAT_G4_BORON_CARBIDE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_BORON_OXIDE/Components = 2 "Boron" "Oxygen"
+uv:Ma/XCAT_G4_BORON_OXIDE/Fractions = 2 0.310551 0.689449
+d:Ma/XCAT_G4_BORON_OXIDE/Density = 1.812 g/cm3 
+s:Ma/XCAT_G4_BORON_OXIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_BRAIN_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Gold"
+uv:Ma/XCAT_G4_BRAIN_ICRP/Fractions = 9 0.107 0.145 0.022 0.712 0.002 0.004 0.002 0.005 0.001
+d:Ma/XCAT_G4_BRAIN_ICRP/Density = 1.04 g/cm3 
+s:Ma/XCAT_G4_BRAIN_ICRP/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_TUMOUR_GNP/Components = 10 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium" "Gold"
+uv:Ma/XCAT_G4_TUMOUR_GNP/Fractions = 10 0.10 0.145 0.022 0.712 0.002 0.004 0.002 0.003 0.003 0.007
+d:Ma/XCAT_G4_TUMOUR_GNP/Density = 1.15 g/cm3 # This is the density of something that is .7% gold rest water + a bit for other elements
+s:Ma/XCAT_G4_TUMOUR_GNP/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_BUTANE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_BUTANE/Fractions = 2 0.173408 0.826592
+d:Ma/XCAT_G4_BUTANE/Density = 0.00249343 g/cm3 
+s:Ma/XCAT_G4_BUTANE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_CADMIUM_TELLURIDE/Components = 2 "Cadmium" "Tellurium"
+uv:Ma/XCAT_G4_CADMIUM_TELLURIDE/Fractions = 2 0.468355 0.531645
+d:Ma/XCAT_G4_CADMIUM_TELLURIDE/Density = 6.2 g/cm3 
+s:Ma/XCAT_G4_CADMIUM_TELLURIDE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_CADMIUM_TUNGSTATE/Components = 3 "Oxygen" "Cadmium" "Tungsten"
+uv:Ma/XCAT_G4_CADMIUM_TUNGSTATE/Fractions = 3 0.177644 0.312027 0.510329
+d:Ma/XCAT_G4_CADMIUM_TUNGSTATE/Density = 7.9 g/cm3 
+s:Ma/XCAT_G4_CADMIUM_TUNGSTATE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_CALCIUM_CARBONATE/Components = 3 "Carbon" "Oxygen" "Calcium"
+uv:Ma/XCAT_G4_CALCIUM_CARBONATE/Fractions = 3 0.120003 0.479554 0.400443
+d:Ma/XCAT_G4_CALCIUM_CARBONATE/Density = 2.8 g/cm3 
+s:Ma/XCAT_G4_CALCIUM_CARBONATE/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_CALCIUM_FLUORIDE/Components = 2 "Fluorine" "Calcium"
+uv:Ma/XCAT_G4_CALCIUM_FLUORIDE/Fractions = 2 0.486659 0.513341
+d:Ma/XCAT_G4_CALCIUM_FLUORIDE/Density = 3.18 g/cm3 
+s:Ma/XCAT_G4_CALCIUM_FLUORIDE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_CALCIUM_OXIDE/Components = 2 "Oxygen" "Calcium"
+uv:Ma/XCAT_G4_CALCIUM_OXIDE/Fractions = 2 0.285299 0.714701
+d:Ma/XCAT_G4_CALCIUM_OXIDE/Density = 3.3 g/cm3 
+s:Ma/XCAT_G4_CALCIUM_OXIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_CALCIUM_SULFATE/Components = 3 "Oxygen" "Sulfur" "Calcium"
+uv:Ma/XCAT_G4_CALCIUM_SULFATE/Fractions = 3 0.470095 0.235497 0.294408
+d:Ma/XCAT_G4_CALCIUM_SULFATE/Density = 2.96 g/cm3 
+s:Ma/XCAT_G4_CALCIUM_SULFATE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_CALCIUM_TUNGSTATE/Components = 3 "Oxygen" "Calcium" "Tungsten"
+uv:Ma/XCAT_G4_CALCIUM_TUNGSTATE/Fractions = 3 0.22227 0.139202 0.638529
+d:Ma/XCAT_G4_CALCIUM_TUNGSTATE/Density = 6.062 g/cm3 
+s:Ma/XCAT_G4_CALCIUM_TUNGSTATE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_CARBON_DIOXIDE/Components = 2 "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_CARBON_DIOXIDE/Fractions = 2 0.272916 0.727084
+d:Ma/XCAT_G4_CARBON_DIOXIDE/Density = 0.00184212 g/cm3 
+s:Ma/XCAT_G4_CARBON_DIOXIDE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_CARBON_TETRACHLORIDE/Components = 2 "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_CARBON_TETRACHLORIDE/Fractions = 2 0.078083 0.921917
+d:Ma/XCAT_G4_CARBON_TETRACHLORIDE/Density = 1.594 g/cm3 
+s:Ma/XCAT_G4_CARBON_TETRACHLORIDE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_CELLULOSE_CELLOPHANE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_CELLULOSE_CELLOPHANE/Fractions = 3 0.062162 0.444462 0.493376
+d:Ma/XCAT_G4_CELLULOSE_CELLOPHANE/Density = 1.42 g/cm3 
+s:Ma/XCAT_G4_CELLULOSE_CELLOPHANE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_CELLULOSE_BUTYRATE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_CELLULOSE_BUTYRATE/Fractions = 3 0.067125 0.545403 0.387472
+d:Ma/XCAT_G4_CELLULOSE_BUTYRATE/Density = 1.2 g/cm3 
+s:Ma/XCAT_G4_CELLULOSE_BUTYRATE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_CELLULOSE_NITRATE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_CELLULOSE_NITRATE/Fractions = 4 0.029216 0.271296 0.121276 0.578212
+d:Ma/XCAT_G4_CELLULOSE_NITRATE/Density = 1.49 g/cm3 
+s:Ma/XCAT_G4_CELLULOSE_NITRATE/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_CERIC_SULFATE/Components = 5 "Hydrogen" "Nitrogen" "Oxygen" "Sulfur" "Cerium"
+uv:Ma/XCAT_G4_CERIC_SULFATE/Fractions = 5 0.107596 0.0008 0.874976 0.014627 0.002001
+d:Ma/XCAT_G4_CERIC_SULFATE/Density = 1.03 g/cm3 
+s:Ma/XCAT_G4_CERIC_SULFATE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_CESIUM_FLUORIDE/Components = 2 "Fluorine" "Cesium"
+uv:Ma/XCAT_G4_CESIUM_FLUORIDE/Fractions = 2 0.125069 0.874931
+d:Ma/XCAT_G4_CESIUM_FLUORIDE/Density = 4.115 g/cm3 
+s:Ma/XCAT_G4_CESIUM_FLUORIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_CESIUM_IODIDE/Components = 2 "Iodine" "Cesium"
+uv:Ma/XCAT_G4_CESIUM_IODIDE/Fractions = 2 0.488451 0.511549
+d:Ma/XCAT_G4_CESIUM_IODIDE/Density = 4.51 g/cm3 
+s:Ma/XCAT_G4_CESIUM_IODIDE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_CHLOROBENZENE/Components = 3 "Hydrogen" "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_CHLOROBENZENE/Fractions = 3 0.044772 0.640254 0.314974
+d:Ma/XCAT_G4_CHLOROBENZENE/Density = 1.1058 g/cm3 
+s:Ma/XCAT_G4_CHLOROBENZENE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_CHLOROFORM/Components = 3 "Hydrogen" "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_CHLOROFORM/Fractions = 3 0.008443 0.100613 0.890944
+d:Ma/XCAT_G4_CHLOROFORM/Density = 1.4832 g/cm3 
+s:Ma/XCAT_G4_CHLOROFORM/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_CONCRETE/Components = 10 "Hydrogen" "Carbon" "Oxygen" "Sodium" "Magnesium" "Aluminum" "Silicon" "Potassium" "Calcium" "Iron"
+uv:Ma/XCAT_G4_CONCRETE/Fractions = 10 0.01 0.001 0.529107 0.016 0.002 0.033872 0.337021 0.013 0.044 0.014
+d:Ma/XCAT_G4_CONCRETE/Density = 2.3 g/cm3 
+s:Ma/XCAT_G4_CONCRETE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_CYCLOHEXANE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_CYCLOHEXANE/Fractions = 2 0.143711 0.856289
+d:Ma/XCAT_G4_CYCLOHEXANE/Density = 0.779 g/cm3 
+s:Ma/XCAT_G4_CYCLOHEXANE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_DICHLORODIETHYL_ETHER/Components = 4 "Hydrogen" "Carbon" "Oxygen" "Chlorine"
+uv:Ma/XCAT_G4_DICHLORODIETHYL_ETHER/Fractions = 4 0.056381 0.335942 0.111874 0.495802
+d:Ma/XCAT_G4_DICHLORODIETHYL_ETHER/Density = 1.2199 g/cm3 
+s:Ma/XCAT_G4_DICHLORODIETHYL_ETHER/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_DIETHYL_ETHER/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_DIETHYL_ETHER/Fractions = 3 0.135978 0.648171 0.215851
+d:Ma/XCAT_G4_DIETHYL_ETHER/Density = 0.71378 g/cm3 
+s:Ma/XCAT_G4_DIETHYL_ETHER/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_DIMETHYL_SULFOXIDE/Components = 4 "Hydrogen" "Carbon" "Oxygen" "Sulfur"
+uv:Ma/XCAT_G4_DIMETHYL_SULFOXIDE/Fractions = 4 0.077403 0.307467 0.204782 0.410348
+d:Ma/XCAT_G4_DIMETHYL_SULFOXIDE/Density = 1.1014 g/cm3 
+s:Ma/XCAT_G4_DIMETHYL_SULFOXIDE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_ETHANE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_ETHANE/Fractions = 2 0.201115 0.798885
+d:Ma/XCAT_G4_ETHANE/Density = 0.00125324 g/cm3 
+s:Ma/XCAT_G4_ETHANE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_ETHYL_ALCOHOL/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_ETHYL_ALCOHOL/Fractions = 3 0.131269 0.521438 0.347294
+d:Ma/XCAT_G4_ETHYL_ALCOHOL/Density = 0.7893 g/cm3 
+s:Ma/XCAT_G4_ETHYL_ALCOHOL/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_ETHYL_CELLULOSE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_ETHYL_CELLULOSE/Fractions = 3 0.090027 0.585182 0.324791
+d:Ma/XCAT_G4_ETHYL_CELLULOSE/Density = 1.13 g/cm3 
+s:Ma/XCAT_G4_ETHYL_CELLULOSE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_ETHYLENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_ETHYLENE/Fractions = 2 0.143711 0.856289
+d:Ma/XCAT_G4_ETHYLENE/Density = 0.00117497 g/cm3 
+s:Ma/XCAT_G4_ETHYLENE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_EYE_LENS_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Gold"
+uv:Ma/XCAT_G4_EYE_LENS_ICRP/Fractions = 9 0.097 0.125 0.056 0.646 0.001 0.001 0.003 0.001 0.07
+d:Ma/XCAT_G4_EYE_LENS_ICRP/Density = 1.15 g/cm3 
+s:Ma/XCAT_G4_EYE_LENS_ICRP/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_FERRIC_OXIDE/Components = 2 "Oxygen" "Iron"
+uv:Ma/XCAT_G4_FERRIC_OXIDE/Fractions = 2 0.300567 0.699433
+d:Ma/XCAT_G4_FERRIC_OXIDE/Density = 5.2 g/cm3 
+s:Ma/XCAT_G4_FERRIC_OXIDE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_FERROBORIDE/Components = 2 "Boron" "Iron"
+uv:Ma/XCAT_G4_FERROBORIDE/Fractions = 2 0.162174 0.837826
+d:Ma/XCAT_G4_FERROBORIDE/Density = 7.15 g/cm3 
+s:Ma/XCAT_G4_FERROBORIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_FERROUS_OXIDE/Components = 2 "Oxygen" "Iron"
+uv:Ma/XCAT_G4_FERROUS_OXIDE/Fractions = 2 0.222689 0.777311
+d:Ma/XCAT_G4_FERROUS_OXIDE/Density = 5.7 g/cm3 
+s:Ma/XCAT_G4_FERROUS_OXIDE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_FERROUS_SULFATE/Components = 7 "Hydrogen" "Nitrogen" "Oxygen" "Sodium" "Sulfur" "Chlorine" "Iron"
+uv:Ma/XCAT_G4_FERROUS_SULFATE/Fractions = 7 0.108259 2.7e-05 0.878636 2.2e-05 0.012968 3.4e-05 5.4e-05
+d:Ma/XCAT_G4_FERROUS_SULFATE/Density = 1.024 g/cm3 
+s:Ma/XCAT_G4_FERROUS_SULFATE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_GADOLINIUM_OXYSULFIDE/Components = 3 "Oxygen" "Sulfur" "Gadolinium"
+uv:Ma/XCAT_G4_GADOLINIUM_OXYSULFIDE/Fractions = 3 0.084528 0.08469 0.830782
+d:Ma/XCAT_G4_GADOLINIUM_OXYSULFIDE/Density = 7.44 g/cm3 
+s:Ma/XCAT_G4_GADOLINIUM_OXYSULFIDE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_GALLIUM_ARSENIDE/Components = 2 "Gallium" "Arsenic"
+uv:Ma/XCAT_G4_GALLIUM_ARSENIDE/Fractions = 2 0.482019 0.517981
+d:Ma/XCAT_G4_GALLIUM_ARSENIDE/Density = 5.31 g/cm3 
+s:Ma/XCAT_G4_GALLIUM_ARSENIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_GEL_PHOTO_EMULSION/Components = 5 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sulfur"
+uv:Ma/XCAT_G4_GEL_PHOTO_EMULSION/Fractions = 5 0.08118 0.41606 0.11124 0.38064 0.01088
+d:Ma/XCAT_G4_GEL_PHOTO_EMULSION/Density = 1.2914 g/cm3 
+s:Ma/XCAT_G4_GEL_PHOTO_EMULSION/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_Pyrex_Glass/Components = 6 "Boron" "Oxygen" "Sodium" "Aluminum" "Silicon" "Potassium"
+uv:Ma/XCAT_G4_Pyrex_Glass/Fractions = 6 0.040064 0.539562 0.028191 0.011644 0.37722 0.003321
+d:Ma/XCAT_G4_Pyrex_Glass/Density = 2.23 g/cm3 
+s:Ma/XCAT_G4_Pyrex_Glass/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_GLASS_LEAD/Components = 5 "Oxygen" "Silicon" "Titanium" "Arsenic" "Lead"
+uv:Ma/XCAT_G4_GLASS_LEAD/Fractions = 5 0.156453 0.080866 0.008092 0.002651 0.751938
+d:Ma/XCAT_G4_GLASS_LEAD/Density = 6.22 g/cm3 
+s:Ma/XCAT_G4_GLASS_LEAD/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_GLASS_PLATE/Components = 4 "Oxygen" "Sodium" "Silicon" "Calcium"
+uv:Ma/XCAT_G4_GLASS_PLATE/Fractions = 4 0.4598 0.096441 0.336553 0.107205
+d:Ma/XCAT_G4_GLASS_PLATE/Density = 2.4 g/cm3 
+s:Ma/XCAT_G4_GLASS_PLATE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_GLUCOSE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_GLUCOSE/Fractions = 3 0.071204 0.363652 0.565144
+d:Ma/XCAT_G4_GLUCOSE/Density = 1.54 g/cm3 
+s:Ma/XCAT_G4_GLUCOSE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_GLUTAMINE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_GLUTAMINE/Fractions = 4 0.068965 0.410926 0.191681 0.328427
+d:Ma/XCAT_G4_GLUTAMINE/Density = 1.46 g/cm3 
+s:Ma/XCAT_G4_GLUTAMINE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_GLYCEROL/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_GLYCEROL/Fractions = 3 0.087554 0.391262 0.521185
+d:Ma/XCAT_G4_GLYCEROL/Density = 1.2613 g/cm3 
+s:Ma/XCAT_G4_GLYCEROL/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_GYPSUM/Components = 4 "Hydrogen" "Oxygen" "Sulfur" "Calcium"
+uv:Ma/XCAT_G4_GYPSUM/Fractions = 4 0.023416 0.557572 0.186215 0.232797
+d:Ma/XCAT_G4_GYPSUM/Density = 2.32 g/cm3 
+s:Ma/XCAT_G4_GYPSUM/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_KAPTON/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_KAPTON/Fractions = 4 0.026362 0.691133 0.07327 0.209235
+d:Ma/XCAT_G4_KAPTON/Density = 1.42 g/cm3 
+s:Ma/XCAT_G4_KAPTON/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_LANTHANUM_OXYBROMIDE/Components = 3 "Oxygen" "Bromine" "Lanthanum"
+uv:Ma/XCAT_G4_LANTHANUM_OXYBROMIDE/Fractions = 3 0.068138 0.340294 0.591568
+d:Ma/XCAT_G4_LANTHANUM_OXYBROMIDE/Density = 6.28 g/cm3 
+s:Ma/XCAT_G4_LANTHANUM_OXYBROMIDE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_LANTHANUM_OXYSULFIDE/Components = 3 "Oxygen" "Sulfur" "Lanthanum"
+uv:Ma/XCAT_G4_LANTHANUM_OXYSULFIDE/Fractions = 3 0.0936 0.093778 0.812622
+d:Ma/XCAT_G4_LANTHANUM_OXYSULFIDE/Density = 5.86 g/cm3 
+s:Ma/XCAT_G4_LANTHANUM_OXYSULFIDE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_LEAD_OXIDE/Components = 2 "Oxygen" "Lead"
+uv:Ma/XCAT_G4_LEAD_OXIDE/Fractions = 2 0.071682 0.928318
+d:Ma/XCAT_G4_LEAD_OXIDE/Density = 9.53 g/cm3 
+s:Ma/XCAT_G4_LEAD_OXIDE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_LITHIUM_AMIDE/Components = 3 "Hydrogen" "Lithium" "Nitrogen"
+uv:Ma/XCAT_G4_LITHIUM_AMIDE/Fractions = 3 0.087783 0.302262 0.609955
+d:Ma/XCAT_G4_LITHIUM_AMIDE/Density = 1.178 g/cm3 
+s:Ma/XCAT_G4_LITHIUM_AMIDE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_LITHIUM_CARBONATE/Components = 3 "Lithium" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_LITHIUM_CARBONATE/Fractions = 3 0.187871 0.16255 0.649579
+d:Ma/XCAT_G4_LITHIUM_CARBONATE/Density = 2.11 g/cm3 
+s:Ma/XCAT_G4_LITHIUM_CARBONATE/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_LITHIUM_FLUORIDE/Components = 2 "Lithium" "Fluorine"
+uv:Ma/XCAT_G4_LITHIUM_FLUORIDE/Fractions = 2 0.267585 0.732415
+d:Ma/XCAT_G4_LITHIUM_FLUORIDE/Density = 2.635 g/cm3 
+s:Ma/XCAT_G4_LITHIUM_FLUORIDE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_LITHIUM_HYDRIDE/Components = 2 "Hydrogen" "Lithium"
+uv:Ma/XCAT_G4_LITHIUM_HYDRIDE/Fractions = 2 0.126797 0.873203
+d:Ma/XCAT_G4_LITHIUM_HYDRIDE/Density = 0.82 g/cm3 
+s:Ma/XCAT_G4_LITHIUM_HYDRIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_LITHIUM_IODIDE/Components = 2 "Lithium" "Iodine"
+uv:Ma/XCAT_G4_LITHIUM_IODIDE/Fractions = 2 0.051858 0.948142
+d:Ma/XCAT_G4_LITHIUM_IODIDE/Density = 3.494 g/cm3 
+s:Ma/XCAT_G4_LITHIUM_IODIDE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_LITHIUM_OXIDE/Components = 2 "Lithium" "Oxygen"
+uv:Ma/XCAT_G4_LITHIUM_OXIDE/Fractions = 2 0.46457 0.53543
+d:Ma/XCAT_G4_LITHIUM_OXIDE/Density = 2.013 g/cm3 
+s:Ma/XCAT_G4_LITHIUM_OXIDE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_LITHIUM_TETRABORATE/Components = 3 "Lithium" "Boron" "Oxygen"
+uv:Ma/XCAT_G4_LITHIUM_TETRABORATE/Fractions = 3 0.082085 0.25568 0.662235
+d:Ma/XCAT_G4_LITHIUM_TETRABORATE/Density = 2.44 g/cm3 
+s:Ma/XCAT_G4_LITHIUM_TETRABORATE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_LUNG_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_LUNG_ICRP/Fractions = 9 0.105 0.083 0.023 0.779 0.002 0.001 0.002 0.003 0.002
+d:Ma/XCAT_G4_LUNG_ICRP/Density = 1.04 g/cm3 
+s:Ma/XCAT_G4_LUNG_ICRP/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_LUNG_LD_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_LUNG_LD_ICRP/Fractions = 9 0.105 0.083 0.023 0.779 0.002 0.001 0.002 0.003 0.002
+d:Ma/XCAT_G4_LUNG_LD_ICRP/Density = 0.24 g/cm3 
+s:Ma/XCAT_G4_LUNG_LD_ICRP/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_M3_WAX/Components = 5 "Hydrogen" "Carbon" "Oxygen" "Magnesium" "Calcium"
+uv:Ma/XCAT_G4_M3_WAX/Fractions = 5 0.114318 0.655823 0.092183 0.134792 0.002883
+d:Ma/XCAT_G4_M3_WAX/Density = 1.05 g/cm3 
+s:Ma/XCAT_G4_M3_WAX/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_MAGNESIUM_CARBONATE/Components = 3 "Carbon" "Oxygen" "Magnesium"
+uv:Ma/XCAT_G4_MAGNESIUM_CARBONATE/Fractions = 3 0.142455 0.569278 0.288267
+d:Ma/XCAT_G4_MAGNESIUM_CARBONATE/Density = 2.958 g/cm3 
+s:Ma/XCAT_G4_MAGNESIUM_CARBONATE/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_MAGNESIUM_FLUORIDE/Components = 2 "Fluorine" "Magnesium"
+uv:Ma/XCAT_G4_MAGNESIUM_FLUORIDE/Fractions = 2 0.609883 0.390117
+d:Ma/XCAT_G4_MAGNESIUM_FLUORIDE/Density = 3.0 g/cm3 
+s:Ma/XCAT_G4_MAGNESIUM_FLUORIDE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_MAGNESIUM_OXIDE/Components = 2 "Oxygen" "Magnesium"
+uv:Ma/XCAT_G4_MAGNESIUM_OXIDE/Fractions = 2 0.396964 0.603036
+d:Ma/XCAT_G4_MAGNESIUM_OXIDE/Density = 3.58 g/cm3 
+s:Ma/XCAT_G4_MAGNESIUM_OXIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_MAGNESIUM_TETRABORATE/Components = 3 "Boron" "Oxygen" "Magnesium"
+uv:Ma/XCAT_G4_MAGNESIUM_TETRABORATE/Fractions = 3 0.240837 0.62379 0.135373
+d:Ma/XCAT_G4_MAGNESIUM_TETRABORATE/Density = 2.53 g/cm3 
+s:Ma/XCAT_G4_MAGNESIUM_TETRABORATE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_MERCURIC_IODIDE/Components = 2 "Iodine" "Mercury"
+uv:Ma/XCAT_G4_MERCURIC_IODIDE/Fractions = 2 0.55856 0.44144
+d:Ma/XCAT_G4_MERCURIC_IODIDE/Density = 6.36 g/cm3 
+s:Ma/XCAT_G4_MERCURIC_IODIDE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_METHANE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_METHANE/Fractions = 2 0.251306 0.748694
+d:Ma/XCAT_G4_METHANE/Density = 0.000667151 g/cm3 
+s:Ma/XCAT_G4_METHANE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_METHANOL/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_METHANOL/Fractions = 3 0.125822 0.374852 0.499326
+d:Ma/XCAT_G4_METHANOL/Density = 0.7914 g/cm3 
+s:Ma/XCAT_G4_METHANOL/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_MIX_D_WAX/Components = 5 "Hydrogen" "Carbon" "Oxygen" "Magnesium" "Titanium"
+uv:Ma/XCAT_G4_MIX_D_WAX/Fractions = 5 0.13404 0.77796 0.03502 0.038594 0.014386
+d:Ma/XCAT_G4_MIX_D_WAX/Density = 0.99 g/cm3 
+s:Ma/XCAT_G4_MIX_D_WAX/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_MS20_TISSUE/Components = 6 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Magnesium" "Chlorine"
+uv:Ma/XCAT_G4_MS20_TISSUE/Fractions = 6 0.081192 0.583442 0.017798 0.186381 0.130287 0.0009
+d:Ma/XCAT_G4_MS20_TISSUE/Density = 1.0 g/cm3 
+s:Ma/XCAT_G4_MS20_TISSUE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP/Fractions = 9 0.102 0.143 0.034 0.71 0.001 0.002 0.003 0.001 0.004
+d:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP/Density = 1.05 g/cm3 
+s:Ma/XCAT_G4_MUSCLE_SKELETAL_ICRP/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_MUSCLE_STRIATED_ICRU/Components = 8 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Potassium"
+uv:Ma/XCAT_G4_MUSCLE_STRIATED_ICRU/Fractions = 8 0.102 0.123 0.035 0.729 0.001 0.002 0.004 0.003
+d:Ma/XCAT_G4_MUSCLE_STRIATED_ICRU/Density = 1.04 g/cm3 
+s:Ma/XCAT_G4_MUSCLE_STRIATED_ICRU/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_MUSCLE_WITH_SUCROSE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_MUSCLE_WITH_SUCROSE/Fractions = 4 0.098234 0.156214 0.035451 0.7101
+d:Ma/XCAT_G4_MUSCLE_WITH_SUCROSE/Density = 1.11 g/cm3 
+s:Ma/XCAT_G4_MUSCLE_WITH_SUCROSE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_MUSCLE_WITHOUT_SUCROSE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_MUSCLE_WITHOUT_SUCROSE/Fractions = 4 0.101969 0.120058 0.035451 0.742522
+d:Ma/XCAT_G4_MUSCLE_WITHOUT_SUCROSE/Density = 1.07 g/cm3 
+s:Ma/XCAT_G4_MUSCLE_WITHOUT_SUCROSE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_NAPHTHALENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_NAPHTHALENE/Fractions = 2 0.062909 0.937091
+d:Ma/XCAT_G4_NAPHTHALENE/Density = 1.145 g/cm3 
+s:Ma/XCAT_G4_NAPHTHALENE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_NITROBENZENE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_NITROBENZENE/Fractions = 4 0.040935 0.585374 0.113773 0.259918
+d:Ma/XCAT_G4_NITROBENZENE/Density = 1.19867 g/cm3 
+s:Ma/XCAT_G4_NITROBENZENE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_NITROUS_OXIDE/Components = 2 "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_NITROUS_OXIDE/Fractions = 2 0.636483 0.363517
+d:Ma/XCAT_G4_NITROUS_OXIDE/Density = 0.00183094 g/cm3 
+s:Ma/XCAT_G4_NITROUS_OXIDE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_OCTANE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_OCTANE/Fractions = 2 0.158821 0.841179
+d:Ma/XCAT_G4_OCTANE/Density = 0.7026 g/cm3 
+s:Ma/XCAT_G4_OCTANE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_PARAFFIN/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_PARAFFIN/Fractions = 2 0.148605 0.851395
+d:Ma/XCAT_G4_PARAFFIN/Density = 0.93 g/cm3 
+s:Ma/XCAT_G4_PARAFFIN/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_PHOTO_EMULSION/Components = 8 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sulfur" "Bromine" "Silver" "Iodine"
+uv:Ma/XCAT_G4_PHOTO_EMULSION/Fractions = 8 0.0141 0.072261 0.01932 0.066101 0.00189 0.349103 0.474105 0.00312
+d:Ma/XCAT_G4_PHOTO_EMULSION/Density = 3.815 g/cm3 
+s:Ma/XCAT_G4_PHOTO_EMULSION/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_PLASTIC_SC_VINYLTOLUENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_PLASTIC_SC_VINYLTOLUENE/Fractions = 2 0.085 0.915
+d:Ma/XCAT_G4_PLASTIC_SC_VINYLTOLUENE/Density = 1.032 g/cm3 
+s:Ma/XCAT_G4_PLASTIC_SC_VINYLTOLUENE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_POLYACRYLONITRILE/Components = 3 "Hydrogen" "Carbon" "Nitrogen"
+uv:Ma/XCAT_G4_POLYACRYLONITRILE/Fractions = 3 0.056983 0.679056 0.263962
+d:Ma/XCAT_G4_POLYACRYLONITRILE/Density = 1.17 g/cm3 
+s:Ma/XCAT_G4_POLYACRYLONITRILE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_POLYCARBONATE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_POLYCARBONATE/Fractions = 3 0.055491 0.755751 0.188758
+d:Ma/XCAT_G4_POLYCARBONATE/Density = 1.2 g/cm3 
+s:Ma/XCAT_G4_POLYCARBONATE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_POLYCHLOROSTYRENE/Components = 3 "Hydrogen" "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_POLYCHLOROSTYRENE/Fractions = 3 0.061869 0.696325 0.241806
+d:Ma/XCAT_G4_POLYCHLOROSTYRENE/Density = 1.3 g/cm3 
+s:Ma/XCAT_G4_POLYCHLOROSTYRENE/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_POLYETHYLENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_POLYETHYLENE/Fractions = 2 0.143711 0.856289
+d:Ma/XCAT_G4_POLYETHYLENE/Density = 0.94 g/cm3 
+s:Ma/XCAT_G4_POLYETHYLENE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_MYLAR/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_MYLAR/Fractions = 3 0.041959 0.625017 0.333025
+d:Ma/XCAT_G4_MYLAR/Density = 1.4 g/cm3 
+s:Ma/XCAT_G4_MYLAR/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_PLEXIGLASS/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_PLEXIGLASS/Fractions = 3 0.080538 0.599848 0.319614
+d:Ma/XCAT_G4_PLEXIGLASS/Density = 1.19 g/cm3 
+s:Ma/XCAT_G4_PLEXIGLASS/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_POLYOXYMETHYLENE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_POLYOXYMETHYLENE/Fractions = 3 0.067135 0.400017 0.532848
+d:Ma/XCAT_G4_POLYOXYMETHYLENE/Density = 1.425 g/cm3 
+s:Ma/XCAT_G4_POLYOXYMETHYLENE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_POLYPROPYLENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_POLYPROPYLENE/Fractions = 2 0.143711 0.856289
+d:Ma/XCAT_G4_POLYPROPYLENE/Density = 0.9 g/cm3 
+s:Ma/XCAT_G4_POLYPROPYLENE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_POLYSTYRENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_POLYSTYRENE/Fractions = 2 0.077418 0.922582
+d:Ma/XCAT_G4_POLYSTYRENE/Density = 1.06 g/cm3 
+s:Ma/XCAT_G4_POLYSTYRENE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_TEFLON/Components = 2 "Carbon" "Fluorine"
+uv:Ma/XCAT_G4_TEFLON/Fractions = 2 0.240183 0.759817
+d:Ma/XCAT_G4_TEFLON/Density = 2.2 g/cm3 
+s:Ma/XCAT_G4_TEFLON/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_POLYVINYL_ACETATE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_POLYVINYL_ACETATE/Fractions = 3 0.070245 0.558066 0.371689
+d:Ma/XCAT_G4_POLYVINYL_ACETATE/Density = 1.19 g/cm3 
+s:Ma/XCAT_G4_POLYVINYL_ACETATE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_POLYVINYL_ALCOHOL/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_POLYVINYL_ALCOHOL/Fractions = 3 0.091517 0.545298 0.363185
+d:Ma/XCAT_G4_POLYVINYL_ALCOHOL/Density = 1.3 g/cm3 
+s:Ma/XCAT_G4_POLYVINYL_ALCOHOL/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_POLYVINYL_BUTYRAL/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_POLYVINYL_BUTYRAL/Fractions = 3 0.092802 0.680561 0.226637
+d:Ma/XCAT_G4_POLYVINYL_BUTYRAL/Density = 1.12 g/cm3 
+s:Ma/XCAT_G4_POLYVINYL_BUTYRAL/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_POLYVINYL_CHLORIDE/Components = 3 "Hydrogen" "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_POLYVINYL_CHLORIDE/Fractions = 3 0.04838 0.38436 0.56726
+d:Ma/XCAT_G4_POLYVINYL_CHLORIDE/Density = 1.3 g/cm3 
+s:Ma/XCAT_G4_POLYVINYL_CHLORIDE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_POLYVINYLIDENE_CHLORIDE/Components = 3 "Hydrogen" "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_POLYVINYLIDENE_CHLORIDE/Fractions = 3 0.020793 0.247793 0.731413
+d:Ma/XCAT_G4_POLYVINYLIDENE_CHLORIDE/Density = 1.7 g/cm3 
+s:Ma/XCAT_G4_POLYVINYLIDENE_CHLORIDE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_POLYVINYLIDENE_FLUORIDE/Components = 3 "Hydrogen" "Carbon" "Fluorine"
+uv:Ma/XCAT_G4_POLYVINYLIDENE_FLUORIDE/Fractions = 3 0.03148 0.375141 0.593379
+d:Ma/XCAT_G4_POLYVINYLIDENE_FLUORIDE/Density = 1.76 g/cm3 
+s:Ma/XCAT_G4_POLYVINYLIDENE_FLUORIDE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_POLYVINYL_PYRROLIDONE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_POLYVINYL_PYRROLIDONE/Fractions = 4 0.081616 0.648407 0.126024 0.143953
+d:Ma/XCAT_G4_POLYVINYL_PYRROLIDONE/Density = 1.25 g/cm3 
+s:Ma/XCAT_G4_POLYVINYL_PYRROLIDONE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_POTASSIUM_IODIDE/Components = 2 "Potassium" "Iodine"
+uv:Ma/XCAT_G4_POTASSIUM_IODIDE/Fractions = 2 0.235528 0.764472
+d:Ma/XCAT_G4_POTASSIUM_IODIDE/Density = 3.13 g/cm3 
+s:Ma/XCAT_G4_POTASSIUM_IODIDE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_POTASSIUM_OXIDE/Components = 2 "Oxygen" "Potassium"
+uv:Ma/XCAT_G4_POTASSIUM_OXIDE/Fractions = 2 0.169852 0.830148
+d:Ma/XCAT_G4_POTASSIUM_OXIDE/Density = 2.32 g/cm3 
+s:Ma/XCAT_G4_POTASSIUM_OXIDE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_PROPANE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_PROPANE/Fractions = 2 0.182855 0.817145
+d:Ma/XCAT_G4_PROPANE/Density = 0.00187939 g/cm3 
+s:Ma/XCAT_G4_PROPANE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_lPROPANE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_lPROPANE/Fractions = 2 0.182855 0.817145
+d:Ma/XCAT_G4_lPROPANE/Density = 0.43 g/cm3 
+s:Ma/XCAT_G4_lPROPANE/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_PYRIDINE/Components = 3 "Hydrogen" "Carbon" "Nitrogen"
+uv:Ma/XCAT_G4_PYRIDINE/Fractions = 3 0.06371 0.759217 0.177073
+d:Ma/XCAT_G4_PYRIDINE/Density = 0.9819 g/cm3 
+s:Ma/XCAT_G4_PYRIDINE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_RUBBER_BUTYL/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_RUBBER_BUTYL/Fractions = 2 0.143711 0.856289
+d:Ma/XCAT_G4_RUBBER_BUTYL/Density = 0.92 g/cm3 
+s:Ma/XCAT_G4_RUBBER_BUTYL/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_RUBBER_NATURAL/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_RUBBER_NATURAL/Fractions = 2 0.118371 0.881629
+d:Ma/XCAT_G4_RUBBER_NATURAL/Density = 0.92 g/cm3 
+s:Ma/XCAT_G4_RUBBER_NATURAL/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_RUBBER_NEOPRENE/Components = 3 "Hydrogen" "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_RUBBER_NEOPRENE/Fractions = 3 0.05692 0.542646 0.400434
+d:Ma/XCAT_G4_RUBBER_NEOPRENE/Density = 1.23 g/cm3 
+s:Ma/XCAT_G4_RUBBER_NEOPRENE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_SILICON_DIOXIDE/Components = 2 "Oxygen" "Silicon"
+uv:Ma/XCAT_G4_SILICON_DIOXIDE/Fractions = 2 0.532565 0.467435
+d:Ma/XCAT_G4_SILICON_DIOXIDE/Density = 2.32 g/cm3 
+s:Ma/XCAT_G4_SILICON_DIOXIDE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_SILVER_BROMIDE/Components = 2 "Bromine" "Silver"
+uv:Ma/XCAT_G4_SILVER_BROMIDE/Fractions = 2 0.425537 0.574463
+d:Ma/XCAT_G4_SILVER_BROMIDE/Density = 6.473 g/cm3 
+s:Ma/XCAT_G4_SILVER_BROMIDE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_SILVER_CHLORIDE/Components = 2 "Chlorine" "Silver"
+uv:Ma/XCAT_G4_SILVER_CHLORIDE/Fractions = 2 0.247368 0.752632
+d:Ma/XCAT_G4_SILVER_CHLORIDE/Density = 5.56 g/cm3 
+s:Ma/XCAT_G4_SILVER_CHLORIDE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_SILVER_HALIDES/Components = 3 "Bromine" "Silver" "Iodine"
+uv:Ma/XCAT_G4_SILVER_HALIDES/Fractions = 3 0.422895 0.573748 0.003357
+d:Ma/XCAT_G4_SILVER_HALIDES/Density = 6.47 g/cm3 
+s:Ma/XCAT_G4_SILVER_HALIDES/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_SILVER_IODIDE/Components = 2 "Silver" "Iodine"
+uv:Ma/XCAT_G4_SILVER_IODIDE/Fractions = 2 0.459458 0.540542
+d:Ma/XCAT_G4_SILVER_IODIDE/Density = 6.01 g/cm3 
+s:Ma/XCAT_G4_SILVER_IODIDE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_SKIN_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_SKIN_ICRP/Fractions = 9 0.1 0.204 0.042 0.645 0.002 0.001 0.002 0.003 0.001
+d:Ma/XCAT_G4_SKIN_ICRP/Density = 1.29 g/cm3 
+s:Ma/XCAT_G4_SKIN_ICRP/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_SODIUM_CARBONATE/Components = 3 "Carbon" "Oxygen" "Sodium"
+uv:Ma/XCAT_G4_SODIUM_CARBONATE/Fractions = 3 0.113323 0.452861 0.433815
+d:Ma/XCAT_G4_SODIUM_CARBONATE/Density = 2.532 g/cm3 
+s:Ma/XCAT_G4_SODIUM_CARBONATE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_SODIUM_IODIDE/Components = 2 "Sodium" "Iodine"
+uv:Ma/XCAT_G4_SODIUM_IODIDE/Fractions = 2 0.153373 0.846627
+d:Ma/XCAT_G4_SODIUM_IODIDE/Density = 3.667 g/cm3 
+s:Ma/XCAT_G4_SODIUM_IODIDE/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_SODIUM_MONOXIDE/Components = 2 "Oxygen" "Sodium"
+uv:Ma/XCAT_G4_SODIUM_MONOXIDE/Fractions = 2 0.258143 0.741857
+d:Ma/XCAT_G4_SODIUM_MONOXIDE/Density = 2.27 g/cm3 
+s:Ma/XCAT_G4_SODIUM_MONOXIDE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_SODIUM_NITRATE/Components = 3 "Nitrogen" "Oxygen" "Sodium"
+uv:Ma/XCAT_G4_SODIUM_NITRATE/Fractions = 3 0.164795 0.56472 0.270485
+d:Ma/XCAT_G4_SODIUM_NITRATE/Density = 2.261 g/cm3 
+s:Ma/XCAT_G4_SODIUM_NITRATE/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_STILBENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_STILBENE/Fractions = 2 0.067101 0.932899
+d:Ma/XCAT_G4_STILBENE/Density = 0.9707 g/cm3 
+s:Ma/XCAT_G4_STILBENE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_SUCROSE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_SUCROSE/Fractions = 3 0.064779 0.42107 0.514151
+d:Ma/XCAT_G4_SUCROSE/Density = 1.5805 g/cm3 
+s:Ma/XCAT_G4_SUCROSE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_TERPHENYL/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_TERPHENYL/Fractions = 2 0.044543 0.955457
+d:Ma/XCAT_G4_TERPHENYL/Density = 1.234 g/cm3 
+s:Ma/XCAT_G4_TERPHENYL/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_TESTIS_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_TESTIS_ICRP/Fractions = 9 0.106 0.099 0.02 0.766 0.002 0.001 0.002 0.002 0.002
+d:Ma/XCAT_G4_TESTIS_ICRP/Density = 1.04 g/cm3 
+s:Ma/XCAT_G4_TESTIS_ICRP/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_TETRACHLOROETHYLENE/Components = 2 "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_TETRACHLOROETHYLENE/Fractions = 2 0.144856 0.855144
+d:Ma/XCAT_G4_TETRACHLOROETHYLENE/Density = 1.625 g/cm3 
+s:Ma/XCAT_G4_TETRACHLOROETHYLENE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_THALLIUM_CHLORIDE/Components = 2 "Chlorine" "Thallium"
+uv:Ma/XCAT_G4_THALLIUM_CHLORIDE/Fractions = 2 0.147822 0.852178
+d:Ma/XCAT_G4_THALLIUM_CHLORIDE/Density = 7.004 g/cm3 
+s:Ma/XCAT_G4_THALLIUM_CHLORIDE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_TISSUE_SOFT_ICRP/Components = 9 "Hydrogen" "Carbon" "Nitrogen" "Oxygen" "Sodium" "Phosphorus" "Sulfur" "Chlorine" "Potassium"
+uv:Ma/XCAT_G4_TISSUE_SOFT_ICRP/Fractions = 9 0.105 0.256 0.027 0.602 0.001 0.002 0.003 0.002 0.002
+d:Ma/XCAT_G4_TISSUE_SOFT_ICRP/Density = 1.03 g/cm3 
+s:Ma/XCAT_G4_TISSUE_SOFT_ICRP/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_TITANIUM_DIOXIDE/Components = 2 "Oxygen" "Titanium"
+uv:Ma/XCAT_G4_TITANIUM_DIOXIDE/Fractions = 2 0.400592 0.599408
+d:Ma/XCAT_G4_TITANIUM_DIOXIDE/Density = 4.26 g/cm3 
+s:Ma/XCAT_G4_TITANIUM_DIOXIDE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_TOLUENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_TOLUENE/Fractions = 2 0.08751 0.91249
+d:Ma/XCAT_G4_TOLUENE/Density = 0.8669 g/cm3 
+s:Ma/XCAT_G4_TOLUENE/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_G4_TRICHLOROETHYLENE/Components = 3 "Hydrogen" "Carbon" "Chlorine"
+uv:Ma/XCAT_G4_TRICHLOROETHYLENE/Fractions = 3 0.007671 0.182831 0.809498
+d:Ma/XCAT_G4_TRICHLOROETHYLENE/Density = 1.46 g/cm3 
+s:Ma/XCAT_G4_TRICHLOROETHYLENE/DefaultColor = "white"
+
+sv:Ma/XCAT_G4_TRIETHYL_PHOSPHATE/Components = 4 "Hydrogen" "Carbon" "Oxygen" "Phosphorus"
+uv:Ma/XCAT_G4_TRIETHYL_PHOSPHATE/Fractions = 4 0.082998 0.395628 0.351334 0.17004
+d:Ma/XCAT_G4_TRIETHYL_PHOSPHATE/Density = 1.07 g/cm3 
+s:Ma/XCAT_G4_TRIETHYL_PHOSPHATE/DefaultColor = "grey"
+
+sv:Ma/XCAT_G4_TUNGSTEN_HEXAFLUORIDE/Components = 2 "Fluorine" "Tungsten"
+uv:Ma/XCAT_G4_TUNGSTEN_HEXAFLUORIDE/Fractions = 2 0.382723 0.617277
+d:Ma/XCAT_G4_TUNGSTEN_HEXAFLUORIDE/Density = 2.4 g/cm3 
+s:Ma/XCAT_G4_TUNGSTEN_HEXAFLUORIDE/DefaultColor = "green"
+
+sv:Ma/XCAT_G4_UREA/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_UREA/Fractions = 4 0.067131 0.199999 0.466459 0.266411
+d:Ma/XCAT_G4_UREA/Density = 1.323 g/cm3 
+s:Ma/XCAT_G4_UREA/DefaultColor = "red"
+
+sv:Ma/XCAT_G4_VALINE/Components = 4 "Hydrogen" "Carbon" "Nitrogen" "Oxygen"
+uv:Ma/XCAT_G4_VALINE/Fractions = 4 0.094641 0.512645 0.119565 0.27315
+d:Ma/XCAT_G4_VALINE/Density = 1.23 g/cm3 
+s:Ma/XCAT_G4_VALINE/DefaultColor = "TransparentBlack"
+
+sv:Ma/XCAT_G4_VITON/Components = 3 "Hydrogen" "Carbon" "Fluorine"
+uv:Ma/XCAT_G4_VITON/Fractions = 3 0.009417 0.280555 0.710028
+d:Ma/XCAT_G4_VITON/Density = 1.8 g/cm3 
+s:Ma/XCAT_G4_VITON/DefaultColor = "blue"
+
+sv:Ma/XCAT_G4_XYLENE/Components = 2 "Hydrogen" "Carbon"
+uv:Ma/XCAT_G4_XYLENE/Fractions = 2 0.094935 0.905065
+d:Ma/XCAT_G4_XYLENE/Density = 0.87 g/cm3 
+s:Ma/XCAT_G4_XYLENE/DefaultColor = "orange"
+
+sv:Ma/XCAT_G4_LUCITE/Components = 3 "Hydrogen" "Carbon" "Oxygen"
+uv:Ma/XCAT_G4_LUCITE/Fractions = 3 0.080538 0.599848 0.319614
+d:Ma/XCAT_G4_LUCITE/Density = 1.19 g/cm3 
+s:Ma/XCAT_G4_LUCITE/DefaultColor = "yellow"
+
+sv:Ma/XCAT_G4_BODY/Components = 12 "Oxygen" "Carbon" "Hydrogen" "Nitrogen" "Calcium" "Phosphorus" "Potassium" "Sulfur" "Sodium" "Chlorine" "Magnesium" "Iron"
+uv:Ma/XCAT_G4_BODY/Fractions = 12 0.65 0.18 0.1 0.03 0.015 0.01 0.0025 0.0025 0.0015 0.0015 0.0005 6e-05
+d:Ma/XCAT_G4_BODY/Density = 1.8 g/cm3 
+s:Ma/XCAT_G4_BODY/DefaultColor = "skyblue"
+
+sv:Ma/XCAT_Body_(water)/Components = 12 "Oxygen" "Carbon" "Hydrogen" "Nitrogen" "Calcium" "Phosphorus" "Potassium" "Sulfur" "Sodium" "Chlorine" "Magnesium" "Iron"
+uv:Ma/XCAT_Body_(water)/Fractions = 12 0.65 0.18 0.1 0.03 0.015 0.01 0.0025 0.0025 0.00794 0.0015 0.0005 6e-05
+d:Ma/XCAT_Body_(water)/Density = 1.8 g/cm3 
+s:Ma/XCAT_Body_(water)/DefaultColor = "skyblue"
