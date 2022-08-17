@@ -566,9 +566,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
                 energy_depositions[index] = np.array(energy_depositions[index])/kernel_total_values[index]
 
                 energy_depositions[index] = energy_depositions[index].reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-        
-        print('Calling Superimpose')
-        
+                
         energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],energy_depositions,center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
@@ -784,7 +782,7 @@ def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025,k
         beam_coors = []
         
         # base = np.exp(1/(2*angle_spread**2))/(angle_spread*np.sqrt(2*np.pi))
-        base = 1.5
+        base = 1.02
         
         # this will make everything out of order but that's fine
         for n in range(num_rays//4):
