@@ -313,7 +313,6 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     
     return voxel_info
     
-
 def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
     '''
     Parameters:
@@ -403,6 +402,17 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
     
     return energy_deposited
 
+def mask_superimpose(voxel_info):
+    '''
+    masks the superimpose function so that it can be called with pool
+    '''
+    energy_depositions = pickle.load(open('energy_depositions.pickle','rb'))
+    center_coor_en = pickle.load(open('center_coor_en.pickle','rb'))
+    mat_array = pickle.load(open('mat_array.pickle','rb'))
+    
+    return Superimpose(voxel_info['indices'],voxel_info['TERMA'],energy_depositions,center_coor_en,mat_array)
+    
+    
 def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores):
     '''
     Parameters:
@@ -566,10 +576,19 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
                 energy_depositions[index] = np.array(energy_depositions[index])/kernel_total_values[index]
 
                 energy_depositions[index] = energy_depositions[index].reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
-                
-        energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],energy_depositions,center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
+        
+        pickle.dump(energy_depositions,open('energy_depositions.pickle','wb'))
+        pickle.dump(center_coor_en,open('center_coor_en.pickle','wb'))
+        pickle.dump(mat_array,open('mat_array.pickle','wb'))
+        
+        p = Pool(num_cores)
+        
+        energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
+        
+        # energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],energy_depositions,center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
+        p.close()
         print(ray)
     
     energy_deposit = np.array(sum(energy_deposit))
@@ -632,7 +651,7 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       NOTE: DTYPE MUST BE INTEGERS NOT FLOATS
     
     num_cores :: integer 
-      number of cores to use (currently has no effect but I'm keeping this parameter in case I add multiprocessing back in)
+      number of cores to use 
         
     Returns:
     -------
