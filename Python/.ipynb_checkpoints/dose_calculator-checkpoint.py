@@ -244,7 +244,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     
     return(voxel_info)
 
-def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_spread,beam_energy,ini_fluence,mu,mat_array=None,air_index=None):
+def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_spread,beam_energy,ini_fluence,mu,percent_cutoff=1,mat_array=None,air_index=None):
     '''
     Parameters:
     ----------
@@ -278,6 +278,10 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     
     Optional Parameters:
     -------------------
+    percent_cutoff :: float 
+      what percent of initial fluence to stop tracking particles 
+      Default: 1
+    
     mat_array :: array
       array of materials, only given if needing to neglect air.
       this parameter is only used internally: do not provide this if just using this function to calculate TERMA 
@@ -308,7 +312,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     
     if angle_spread[0] <= eps and angle_spread[1] <= eps and angle_spread[2] <= eps:
         for index in range(len(voxel_info)):
-            if voxel_info[index]['d'] != 0 and (mat_array.all()==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index):
+            if voxel_info[index]['d'] != 0 and (air_index==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index) and sum(fluence)>=sum(ini_fluence)*percent_cutoff/100:
                 voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m'))
                 intermediate_list.append(voxel_info[index])
                 fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
@@ -319,7 +323,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     elif angle_spread[1] > eps:
         total_dist = position_spread[1]/angle_spread[1]
         for index in range(len(voxel_info)):
-            if voxel_info[index]['d'] != 0 and (mat_array.all()==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index):
+            if voxel_info[index]['d'] != 0 and (air_index==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index) and sum(fluence)>=sum(ini_fluence)*percent_cutoff/100:
                 voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m')/total_dist)
                 intermediate_list.append(voxel_info[index])
                 total_dist += voxel_info[index]['d']
@@ -772,12 +776,12 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         for n in range(len(beam_coor)): 
             if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
                 raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
-            voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu))
+            voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu,percent_cutoff=percent_cutoff))
     else:
         for n in range(len(beam_coor)): 
             if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
                 raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
-            voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu,mat_array=mat_array,air_index=air_index))
+            voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu,percent_cutoff=percent_cutoff,mat_array=mat_array,air_index=air_index))
     
     # I like having already as a percent of max but I know that it doesn't need to be 
     kernel_arrays = []
