@@ -244,7 +244,7 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
     
     return(voxel_info)
 
-def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_spread,beam_energy,ini_fluence,mu):
+def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_spread,beam_energy,ini_fluence,mu,mat_array=None,air_index=None):
     '''
     Parameters:
     ----------
@@ -270,11 +270,24 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
       vector containing the the beam energies in MeV (corresponding to ini_fluence)
     
     ini_fluence :: numpy array
-      vector containig the initial photon fluences in cm^-2 (corresponding to beam_energy)
+      vector containing the initial photon fluences in cm^-2 (corresponding to beam_energy)
     
     mu :: function
       function that takes energy and material as arguments and returns either mass or linear energy absorption coefficient,
       depending on specified parameters
+    
+    Optional Parameters:
+    -------------------
+    mat_array :: array
+      array of materials, only given if needing to neglect air.
+      this parameter is only used internally: do not provide this if just using this function to calculate TERMA 
+      must be provided if 'air_index' is provided
+      Default: None
+    
+    air_index :: int
+      value of air in mat_array
+      must be provided if 'mat_array' is provided
+      Default: None
     
     Returns:
     -------
@@ -282,7 +295,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
       list of dictionaries each with keys 'd' (distance spent in voxel in cm), 'indices' (the (x,y,z) indices of the voxel),
       and 'TERMA' (the total energy released per unit mass in that voxel) in MeV/g
     
-    '''
+    '''    
     eps = 1.e-7
     
     voxel_info = Siddon(num_planes,voxel_lengths,beam_coor,ini_planes)
@@ -295,16 +308,18 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     
     if angle_spread[0] <= eps and angle_spread[1] <= eps and angle_spread[2] <= eps:
         for index in range(len(voxel_info)):
-            if voxel_info[index]['d'] != 0:
+            if voxel_info[index]['d'] != 0 and (mat_array.all()==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index):
                 voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m'))
                 intermediate_list.append(voxel_info[index])
                 fluence = fluence*np.exp(-mu(beam_energy,voxel_info[index]['indices'],'l')*voxel_info[index]['d'])
         voxel_info = intermediate_list
         
+    
+    # this is for the one fan beam case... 
     elif angle_spread[1] > eps:
         total_dist = position_spread[1]/angle_spread[1]
         for index in range(len(voxel_info)):
-            if voxel_info[index]['d'] != 0:
+            if voxel_info[index]['d'] != 0 and (mat_array.all()==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index):
                 voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m')/total_dist)
                 intermediate_list.append(voxel_info[index])
                 total_dist += voxel_info[index]['d']
@@ -596,7 +611,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     
     return energy_deposit
     
-def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,densities,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores):
+def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,densities,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores=1,coeff_units='cm^2/g',percent_cutoff=1,air_index=None):
     '''
     Parameters:
     ----------
@@ -650,9 +665,24 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel by index of place of material in densities, kernelnames, and filenames, with indexing starting at 0 
       NOTE: DTYPE MUST BE INTEGERS NOT FLOATS
     
+    Optional Parameters:
+    -------------------
     num_cores :: integer 
-      number of cores to use 
-        
+      number of cores to use (currently does not do anything else)
+      Default: 1
+    
+    coeff_units :: str
+      units of the coefficients in 'filenames', either 'cm^2/g' or 'cm^-1'
+      Default: 'cm^2/g'
+    
+    percent_cutoff :: float 
+      what percent of initial fluence to stop tracking particles 
+      Default: 1
+    
+    air_index :: integer 
+      index of air in 'filenames','densities','kernelnames' if you want air to be neglected in calculations; significantly speeds up algorithm 
+      Default: None
+    
     Returns:
     -------
     energy_deposit :: numpy array (Nx-1,Ny-1,Nz-1)
@@ -672,6 +702,12 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     else:
         raise ValueError('\'densities\' parameter must be the same shape as \'mat_array\' or \'filenames\' and \'kernelnames\'')
     
+    if coeff_units == 'cm^2/g':
+        density_units = True
+    elif coeff_units == 'cm^-1':
+        density_units = False
+    else:
+        raise ValueError('\'coeff_units\' parameter must be either \'cm^2/g\' or \'cm^-1\'')
     
     mu_linear = []
     mu_mass = []
@@ -704,12 +740,21 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         '''
         # exponential interpolation
         if kind == 'l':
-            if den_array:
-                return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]
+            if density_units:
+                if den_array:
+                    return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]
+                else:
+                    return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]]
             else:
-                return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))*densities[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]]
+                return np.exp(mu_linear[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))
         elif kind == 'm':
-            return np.exp(mu_mass[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))
+            if density_units:
+                return np.exp(mu_mass[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))
+            else:
+                if den_array:
+                    return np.exp(mu_mass[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))/densities[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]
+                else:
+                    return np.exp(mu_mass[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]](np.log(energy)))/densities[mat_array[voxel_index[0]-1][voxel_index[1]-1][voxel_index[2]-1]]
         else:
             raise ValueError('parameter \"kind\" must be either \'l\' or \'m\'')
     
@@ -723,10 +768,16 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         ini_fluence = ini_fluence*np.pi*position_spread[0]*position_spread[1]
         ini_fluence = ini_fluence/(2*angle_spread[1]*position_spread[0])
     
-    for n in range(len(beam_coor)): 
-        if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
-            raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
-        voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu))
+    if air_index == None:
+        for n in range(len(beam_coor)): 
+            if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
+                raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
+            voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu))
+    else:
+        for n in range(len(beam_coor)): 
+            if (beam_coor[n][0][1]-beam_coor[n][0][0])==0 and (beam_coor[n][1][1]-beam_coor[n][1][0])==0 and (beam_coor[n][2][1]-beam_coor[n][2][0])==0:
+                raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
+            voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu,mat_array=mat_array,air_index=air_index))
     
     # I like having already as a percent of max but I know that it doesn't need to be 
     kernel_arrays = []
