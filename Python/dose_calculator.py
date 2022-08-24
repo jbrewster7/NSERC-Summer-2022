@@ -408,7 +408,8 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
         # print('y top less')
         # for i in range(len(mat_array)):
         #     energy_deposited[i] = energy_deposited[i][:-(center_coor[1]-(len(mat_array[0])-indices[1]))]
-        energy_deposited = np.delete(energy_deposited,np.arange(0,-(center_coor[1]-(len(mat_array[0])-indices[1])),-1)-1,axis=1)
+        energy_deposited = np.delete(energy_deposited,np.arange(len(energy_deposited[0])-(center_coor[1]-(len(mat_array[0])-indices[1])),len(energy_deposited[0])),axis=1)
+        # energy_deposited = np.delete(energy_deposited,np.arange(0,-(center_coor[1]-(len(mat_array[0])-indices[1])),-1)-1,axis=1)
     elif (len(mat_array[0])-indices[1]) > center_coor[1]:
         # print('y top more')
         # for i in range(len(mat_array)):
@@ -420,7 +421,8 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
         # for i in range(len(mat_array)):
         #     for j in range(len(mat_array[i])):
         #         energy_deposited[i][j] = energy_deposited[i][j][:-(center_coor[2]-(len(mat_array[0][0])-indices[2]))]
-        energy_deposited = np.delete(energy_deposited,np.arange(0,-(center_coor[2]-(len(mat_array[0][0])-indices[2])),-1)-1,axis=2)
+        # energy_deposited = np.delete(energy_deposited,np.arange(0,-(center_coor[2]-(len(mat_array[0][0])-indices[2])),-1)-1,axis=2)
+        energy_deposited = np.delete(energy_deposited,np.arange(len(energy_deposited[0][0])-(center_coor[2]-(len(mat_array[0][0])-indices[2])),len(energy_deposited[0][0])),axis=2)
     elif (len(mat_array[0][0])-indices[2]) > center_coor[2]:
         # print('z top more')
         # for i in range(len(mat_array)):
