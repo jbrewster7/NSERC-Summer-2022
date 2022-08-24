@@ -362,61 +362,74 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
     
     if indices[0]-1 < center_coor[0]:
         # print('x bottom less')
-        energy_deposited = energy_deposition_arrays[mat_ind][center_coor[0]-(indices[0]-1):].tolist()
+        # energy_deposited = energy_deposition_arrays[mat_ind][center_coor[0]-(indices[0]-1):].tolist()
+        energy_deposited = energy_deposition_arrays[mat_ind][center_coor[0]-(indices[0]-1):]
     elif indices[0]-1 > center_coor[0]:
         # print('x bottom more')
-        energy_deposited = np.zeros(((indices[0]-1)-center_coor[0],len(energy_deposition_arrays[mat_ind][0]),len(energy_deposition_arrays[mat_ind][0][0]))).tolist() + energy_deposition_arrays[mat_ind].tolist()
+        # energy_deposited = np.zeros(((indices[0]-1)-center_coor[0],len(energy_deposition_arrays[mat_ind][0]),len(energy_deposition_arrays[mat_ind][0][0]))).tolist() + energy_deposition_arrays[mat_ind].tolist()
+        energy_deposited = np.append(np.zeros(((indices[0]-1)-center_coor[0],len(energy_deposition_arrays[mat_ind][0]),len(energy_deposition_arrays[mat_ind][0][0]))),energy_deposition_arrays[mat_ind],axis=0)
     else:
-        energy_deposited = energy_deposition_arrays[mat_ind].tolist()
+        # energy_deposited = energy_deposition_arrays[mat_ind].tolist()
+        energy_deposited = energy_deposition_arrays[mat_ind]
     
     if indices[1]-1 < center_coor[1]:
         # print('y bottom less')
-        for i in range(len(energy_deposited)):
-            energy_deposited[i] = energy_deposited[i][center_coor[1]-(indices[1]-1):]
+        # for i in range(len(energy_deposited)):
+        #     energy_deposited[i] = energy_deposited[i][center_coor[1]-(indices[1]-1):]
+        energy_deposited = np.delete(energy_deposited,range(center_coor[1]-(indices[1]-1)),axis=1)
     elif indices[1]-1 > center_coor[1]:
         # print('y bottom more')
-        for i in range(len(energy_deposited)):
-            energy_deposited[i] = np.zeros(((indices[1]-1)-center_coor[1],len(energy_deposited[0][0]))).tolist() + energy_deposited[i]
+        # for i in range(len(energy_deposited)):
+        #     energy_deposited[i] = np.zeros(((indices[1]-1)-center_coor[1],len(energy_deposited[0][0]))).tolist() + energy_deposited[i]
+        energy_deposited = np.append(np.zeros((len(energy_deposited),(indices[1]-1)-center_coor[1],len(energy_deposited[0][0]))),energy_deposited,axis=1)
     
     if indices[2]-1 < center_coor[2]:
         # print('z bottom less')
-        for i in range(len(energy_deposited)):
-            for j in range(len(energy_deposited[i])):
-                energy_deposited[i][j] = energy_deposited[i][j][center_coor[2]-(indices[2]-1):]
+        # for i in range(len(energy_deposited)):
+        #     for j in range(len(energy_deposited[i])):
+        #         energy_deposited[i][j] = energy_deposited[i][j][center_coor[2]-(indices[2]-1):]
+        energy_deposited = np.delete(energy_deposited,range(center_coor[2]-(indices[2]-1)),axis=2)
     elif indices[2]-1 > center_coor[2]:
         # print('z bottom more')
-        for i in range(len(energy_deposited)):
-            for j in range(len(energy_deposited[i])):
-                energy_deposited[i][j] = np.zeros((indices[2]-1)-center_coor[2]).tolist() + energy_deposited[i][j]
+        # for i in range(len(energy_deposited)):
+        #     for j in range(len(energy_deposited[i])):
+        #         energy_deposited[i][j] = np.zeros((indices[2]-1)-center_coor[2]).tolist() + energy_deposited[i][j]
+        energy_deposited = np.append(np.zeros((len(energy_deposited),len(energy_deposited[0]),(indices[2]-1)-center_coor[2])),energy_deposited,axis=2)
         
     if (len(mat_array)-indices[0]) < center_coor[0]:
         # print('x top less')
         energy_deposited = energy_deposited[:-(center_coor[0]-(len(mat_array)-indices[0]))]
     elif (len(mat_array)-indices[0]) > center_coor[0]:
         # print('x top more')
-        energy_deposited = energy_deposited + np.zeros(((len(mat_array)-indices[0]) - center_coor[0],len(energy_deposited[0]),len(energy_deposited[0][0]))).tolist()
+        # energy_deposited = energy_deposited + np.zeros(((len(mat_array)-indices[0]) - center_coor[0],len(energy_deposited[0]),len(energy_deposited[0][0]))).tolist()
+        energy_deposited = np.append(energy_deposited,np.zeros(((len(mat_array)-indices[0]) - center_coor[0],len(energy_deposited[0]),len(energy_deposited[0][0]))),axis=0)
         
     if (len(mat_array[0])-indices[1]) < center_coor[1]:
         # print('y top less')
-        for i in range(len(mat_array)):
-            energy_deposited[i] = energy_deposited[i][:-(center_coor[1]-(len(mat_array[0])-indices[1]))]
+        # for i in range(len(mat_array)):
+        #     energy_deposited[i] = energy_deposited[i][:-(center_coor[1]-(len(mat_array[0])-indices[1]))]
+        energy_deposited = np.delete(energy_deposited,range(0,-(center_coor[1]-(len(mat_array[0])-indices[1])),-1),axis=1)
     elif (len(mat_array[0])-indices[1]) > center_coor[1]:
         # print('y top more')
-        for i in range(len(mat_array)):
-            energy_deposited[i] = energy_deposited[i] + np.zeros(((len(mat_array[0])-indices[1]) - center_coor[1],len(energy_deposited[0][0]))).tolist()
+        # for i in range(len(mat_array)):
+        #     energy_deposited[i] = energy_deposited[i] + np.zeros(((len(mat_array[0])-indices[1]) - center_coor[1],len(energy_deposited[0][0]))).tolist()
+        energy_deposited = np.append(energy_deposited,np.zeros((len(energy_deposited),(len(mat_array[0])-indices[1]) - center_coor[1],len(energy_deposited[0][0]))),axis=1)
         
     if (len(mat_array[0][0])-indices[2]) < center_coor[2]:
         # print('z top less')
-        for i in range(len(mat_array)):
-            for j in range(len(mat_array[i])):
-                energy_deposited[i][j] = energy_deposited[i][j][:-(center_coor[2]-(len(mat_array[0][0])-indices[2]))]
+        # for i in range(len(mat_array)):
+        #     for j in range(len(mat_array[i])):
+        #         energy_deposited[i][j] = energy_deposited[i][j][:-(center_coor[2]-(len(mat_array[0][0])-indices[2]))]
+        energy_deposited = np.delete(energy_deposited,range(0,-(center_coor[2]-(len(mat_array[0][0])-indices[2])),-1),axis=2)
     elif (len(mat_array[0][0])-indices[2]) > center_coor[2]:
         # print('z top more')
-        for i in range(len(mat_array)):
-            for j in range(len(mat_array[i])):
-                energy_deposited[i][j] = energy_deposited[i][j] + np.zeros((len(mat_array[0][0])-indices[2]) - center_coor[2]).tolist()
+        # for i in range(len(mat_array)):
+        #     for j in range(len(mat_array[i])):
+        #         energy_deposited[i][j] = energy_deposited[i][j] + np.zeros((len(mat_array[0][0])-indices[2]) - center_coor[2]).tolist()
+        energy_deposited = np.append(energy_deposited,np.zeros((len(energy_deposited),len(energy_deposited[0]),(len(mat_array[0][0])-indices[2]) - center_coor[2])),axis=2)
     
-    energy_deposited = np.array(energy_deposited,dtype=np.float32)
+    # print(np.shape(energy_deposited))
+    energy_deposited = np.array(energy_deposited)
     energy_deposited = energy_deposited * TERMA
     
     return energy_deposited
