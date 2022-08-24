@@ -22,18 +22,20 @@ y1,y2 = (-(Ny-1)*dy/2,(Ny-1)*dy/2)
 z1,z2 = (0,0)
 
 # adjustment from center 
-adjust = 0.249
-how_far = 57
-all_adjust = np.linspace(-how_far*adjust,how_far*adjust,2*how_far+1)
-# all_adjust = [0,-adjust,-2*adjust,-3*adjust,-4*adjust,-5*adjust,-6*adjust,adjust,2*adjust,3*adjust,4*adjust,5*adjust,6*adjust]
-# all_adjust = [-adjust,adjust]
-# xadj,yadj = np.meshgrid([-adjust,adjust],all_adjust)
-xadj,yadj = np.meshgrid(0,all_adjust)
-xadj,yadj = xadj.flatten(),yadj.flatten()
+# adjust = 0.249
+# how_far = 57
+# all_adjust = np.linspace(-how_far*adjust,how_far*adjust,2*how_far+1)
+# # all_adjust = [0,-adjust,-2*adjust,-3*adjust,-4*adjust,-5*adjust,-6*adjust,adjust,2*adjust,3*adjust,4*adjust,5*adjust,6*adjust]
+# # all_adjust = [-adjust,adjust]
+# # xadj,yadj = np.meshgrid([-adjust,adjust],all_adjust)
+# xadj,yadj = np.meshgrid(0,all_adjust)
+# xadj,yadj = xadj.flatten(),yadj.flatten()
 
-rays = []
-for n in range(len(xadj)):
-    rays.append(((x1+xadj[n],x2+xadj[n]),(y1,y2),(z1+yadj[n],z2+yadj[n])))
+# rays = []
+# for n in range(len(xadj)):
+#     rays.append(((x1+xadj[n],x2+xadj[n]),(y1,y2),(z1+yadj[n],z2+yadj[n])))
+
+rays = [((0, 0), (-2.5, 2.5), (14.193, 14.193))]
 
 # rays = []
 # for n in range(len(xadj)):
@@ -78,7 +80,7 @@ print(np.shape(densities))
 
 # file names for energy absorption coefficients
 # filenames = ['energy_absorption_coeffs_air.txt','energy_absorption_coeffs_muscle_nodensity.txt','energy_absorption_coeffs_lung_nodensity.txt','rib_bone_coeffs.txt']
-filenames = ['energy_absorption_coeffs_air.txt','energy_absorption_coeffs_muscle.txt','energy_absorption_coeffs.txt','rib_bone_coeffs.txt']
+filenames = ['energy_absorption_coeffs_air.txt','energy_absorption_coeffs_muscle.txt','energy_absorption_coeffs_lung.txt','rib_bone_coeffs.txt']
 
 # kernel info
 kernelname_air = '../Topas/AirKernel.csv'
