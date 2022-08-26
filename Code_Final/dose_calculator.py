@@ -10,12 +10,14 @@ from os.path import exists
 
 def alpha_func(plane,coor1,coor2):
     '''
-    plane is assumed to be already calculated
+    Internal function to be called by Siddon().
     '''
     return (plane-coor1)/(coor2-coor1)
 
 def plane_func(index,plane1,d):
     '''
+    Internal function to be called by Siddon().
+    
     Parameters:
     ----------
     index :: integer
@@ -37,6 +39,8 @@ def plane_func(index,plane1,d):
 
 def voxel_length(alpha,index,d12):
     '''
+    Internal function to be called by Siddon().
+    
     Parameters:
     ----------
     alpha :: list
@@ -59,6 +63,8 @@ def voxel_length(alpha,index,d12):
 
 def voxel_indices(plane1s,coor1s,coor2s,distances,alpha,index):
     '''
+    Internal function to be called by Siddon().
+    
     Parameters:
     ----------
     plane1s :: array
@@ -95,6 +101,8 @@ def voxel_indices(plane1s,coor1s,coor2s,distances,alpha,index):
 
 def alpha_mid(alpha,index):
     '''
+    Internal function to be called by Siddon().
+    
     Parameters:
     ----------
     alpha :: array
@@ -110,36 +118,12 @@ def alpha_mid(alpha,index):
     '''
     return (alpha[index]+alpha[index-1])/2
 
-def plot_grid_3D(size,bins,ifig=None,colour='b'):
+def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes):
     '''
-    size :: tuple
-      (x size, y size, z size) in centimeters
+    Ray tracing algorithm. 
     
-    bins :: tuple 
-      (number of x bins, number of y bins, number of z bins)
-    '''
-    xlines = np.linspace(0,size[0],bins[0]+1)
-    ylines = np.linspace(0,size[1],bins[1]+1)
-    zlines = np.linspace(0,size[2],bins[2]+1)
+    Source: Siddon, R. L. (1985). Fast calculation of the exact radiological path for a three dimensional CT array. In Medical Physics (Vol. 12, Issue 2). https://doi.org/10.1118/1.595715</div>
     
-    plt.close(ifig)
-    fig = plt.figure(ifig)
-    ax = plt.axes(projection='3d')
-    
-    for z in zlines:
-        for x in xlines:
-            ax.plot3D([x,x],[0,size[1]],z,colour)
-        for y in ylines:
-            ax.plot3D([0,size[0]],[y,y],z,colour)
-    
-    for y in ylines:
-        for x in xlines:
-            ax.plot3D([x,x],[y,y],[0,size[2]],colour)
-    
-    return ax,fig
-
-def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
-    '''
     Parameters:
     ----------
     num_planes :: tuple (3)
@@ -238,14 +222,16 @@ def Siddon(num_planes,voxel_lengths,beam_coor,ini_planes,plot=False):
         voxel_info[i-1]['d'] = length
         voxel_info[i-1]['indices'] = indices
     
-    if plot:
-        ax,fig = plot_grid_3D((coor_values['x']['plane'][1]-coor_values['x']['plane'][0],coor_values['y']['plane'][1]-coor_values['y']['plane'][0],coor_values['z']['plane'][1]-coor_values['z']['plane'][0]),(coor_values['x']['N']-1,coor_values['y']['N']-1,coor_values['z']['N']-1),colour='g')
-        ax.plot3D((coor_values['x']['1,2'][0],coor_values['x']['1,2'][1]),(coor_values['y']['1,2'][0],coor_values['y']['1,2'][1]),(coor_values['z']['1,2'][0],coor_values['z']['1,2'][1]),'r')
-    
     return(voxel_info)
 
 def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_spread,beam_energy,ini_fluence,mu,percent_cutoff=1,mat_array=None,air_index=None):
     '''
+    Function to calculate the Total Energy Released in MAtter (TERMA) (total energy released per unit mass). 
+    
+    Can be called externally if you are careful about parameters. Some are not intuitive.
+    
+    Mostly just used in calls internally from Dose_Calculator().
+    
     Parameters:
     ----------
     num_planes :: tuple (3)
@@ -323,7 +309,7 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     elif angle_spread[1] > eps:
         total_dist = position_spread[1]/angle_spread[1]
         for index in range(len(voxel_info)):
-            if voxel_info[index]['d'] != 0 and (air_index==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index) and sum(fluence)>=sum(ini_fluence)*percent_cutoff/100:
+            if voxel_info[index]['d'] != 0 and (air_index==None or mat_array[voxel_info[index]['indices'][0]-1][voxel_info[index]['indices'][1]-1][voxel_info[index]['indices'][2]-1]!=air_index) and np.sum(fluence)>=np.sum(ini_fluence)*percent_cutoff/100:
                 voxel_info[index]['TERMA'] = sum(beam_energy*fluence*mu(beam_energy,voxel_info[index]['indices'],'m')/total_dist)
                 intermediate_list.append(voxel_info[index])
                 total_dist += voxel_info[index]['d']
@@ -334,6 +320,8 @@ def TERMA(num_planes,voxel_lengths,beam_coor,ini_planes,angle_spread,position_sp
     
 def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
     '''
+    Internal function used in calls from Dose_Calculator().
+    
     Parameters:
     ----------
     indices :: tuple (3) 
@@ -361,94 +349,46 @@ def Superimpose(indices,TERMA,energy_deposition_arrays,center_coor,mat_array):
     mat_ind = mat_array[indices[0]-1][indices[1]-1][indices[2]-1]
     
     if indices[0]-1 < center_coor[0]:
-        # print('x bottom less')
-        # energy_deposited = energy_deposition_arrays[mat_ind][center_coor[0]-(indices[0]-1):].tolist()
         energy_deposited = energy_deposition_arrays[mat_ind][center_coor[0]-(indices[0]-1):]
     elif indices[0]-1 > center_coor[0]:
-        # print('x bottom more')
-        # energy_deposited = np.zeros(((indices[0]-1)-center_coor[0],len(energy_deposition_arrays[mat_ind][0]),len(energy_deposition_arrays[mat_ind][0][0]))).tolist() + energy_deposition_arrays[mat_ind].tolist()
         energy_deposited = np.append(np.zeros(((indices[0]-1)-center_coor[0],len(energy_deposition_arrays[mat_ind][0]),len(energy_deposition_arrays[mat_ind][0][0]))),energy_deposition_arrays[mat_ind],axis=0)
     else:
-        # energy_deposited = energy_deposition_arrays[mat_ind].tolist()
         energy_deposited = energy_deposition_arrays[mat_ind]
     
     if indices[1]-1 < center_coor[1]:
-        # print('y bottom less')
-        # for i in range(len(energy_deposited)):
-        #     energy_deposited[i] = energy_deposited[i][center_coor[1]-(indices[1]-1):]
         energy_deposited = np.delete(energy_deposited,np.arange(center_coor[1]-(indices[1]-1)),axis=1)
     elif indices[1]-1 > center_coor[1]:
-        # print('y bottom more')
-        # for i in range(len(energy_deposited)):
-        #     energy_deposited[i] = np.zeros(((indices[1]-1)-center_coor[1],len(energy_deposited[0][0]))).tolist() + energy_deposited[i]
         energy_deposited = np.append(np.zeros((len(energy_deposited),(indices[1]-1)-center_coor[1],len(energy_deposited[0][0]))),energy_deposited,axis=1)
     
     if indices[2]-1 < center_coor[2]:
-        # print('z bottom less')
-        # for i in range(len(energy_deposited)):
-        #     for j in range(len(energy_deposited[i])):
-        #         energy_deposited[i][j] = energy_deposited[i][j][center_coor[2]-(indices[2]-1):]
         energy_deposited = np.delete(energy_deposited,np.arange(center_coor[2]-(indices[2]-1)),axis=2)
     elif indices[2]-1 > center_coor[2]:
-        # print('z bottom more')
-        # for i in range(len(energy_deposited)):
-        #     for j in range(len(energy_deposited[i])):
-        #         energy_deposited[i][j] = np.zeros((indices[2]-1)-center_coor[2]).tolist() + energy_deposited[i][j]
         energy_deposited = np.append(np.zeros((len(energy_deposited),len(energy_deposited[0]),(indices[2]-1)-center_coor[2])),energy_deposited,axis=2)
         
     if (len(mat_array)-indices[0]) < center_coor[0]:
-        # print('x top less')
         energy_deposited = energy_deposited[:-(center_coor[0]-(len(mat_array)-indices[0]))]
     elif (len(mat_array)-indices[0]) > center_coor[0]:
-        # print('x top more')
-        # energy_deposited = energy_deposited + np.zeros(((len(mat_array)-indices[0]) - center_coor[0],len(energy_deposited[0]),len(energy_deposited[0][0]))).tolist()
         energy_deposited = np.append(energy_deposited,np.zeros(((len(mat_array)-indices[0]) - center_coor[0],len(energy_deposited[0]),len(energy_deposited[0][0]))),axis=0)
         
     if (len(mat_array[0])-indices[1]) < center_coor[1]:
-        # print('y top less')
-        # for i in range(len(mat_array)):
-        #     energy_deposited[i] = energy_deposited[i][:-(center_coor[1]-(len(mat_array[0])-indices[1]))]
         energy_deposited = np.delete(energy_deposited,np.arange(len(energy_deposited[0])-(center_coor[1]-(len(mat_array[0])-indices[1])),len(energy_deposited[0])),axis=1)
-        # energy_deposited = np.delete(energy_deposited,np.arange(0,-(center_coor[1]-(len(mat_array[0])-indices[1])),-1)-1,axis=1)
     elif (len(mat_array[0])-indices[1]) > center_coor[1]:
-        # print('y top more')
-        # for i in range(len(mat_array)):
-        #     energy_deposited[i] = energy_deposited[i] + np.zeros(((len(mat_array[0])-indices[1]) - center_coor[1],len(energy_deposited[0][0]))).tolist()
         energy_deposited = np.append(energy_deposited,np.zeros((len(energy_deposited),(len(mat_array[0])-indices[1]) - center_coor[1],len(energy_deposited[0][0]))),axis=1)
         
     if (len(mat_array[0][0])-indices[2]) < center_coor[2]:
-        # print('z top less')
-        # for i in range(len(mat_array)):
-        #     for j in range(len(mat_array[i])):
-        #         energy_deposited[i][j] = energy_deposited[i][j][:-(center_coor[2]-(len(mat_array[0][0])-indices[2]))]
-        # energy_deposited = np.delete(energy_deposited,np.arange(0,-(center_coor[2]-(len(mat_array[0][0])-indices[2])),-1)-1,axis=2)
         energy_deposited = np.delete(energy_deposited,np.arange(len(energy_deposited[0][0])-(center_coor[2]-(len(mat_array[0][0])-indices[2])),len(energy_deposited[0][0])),axis=2)
     elif (len(mat_array[0][0])-indices[2]) > center_coor[2]:
-        # print('z top more')
-        # for i in range(len(mat_array)):
-        #     for j in range(len(mat_array[i])):
-        #         energy_deposited[i][j] = energy_deposited[i][j] + np.zeros((len(mat_array[0][0])-indices[2]) - center_coor[2]).tolist()
         energy_deposited = np.append(energy_deposited,np.zeros((len(energy_deposited),len(energy_deposited[0]),(len(mat_array[0][0])-indices[2]) - center_coor[2])),axis=2)
     
-    # print(np.shape(energy_deposited))
     energy_deposited = np.array(energy_deposited)
     energy_deposited = energy_deposited * TERMA
     
     return energy_deposited
-
-def mask_superimpose(voxel_info):
-    '''
-    masks the superimpose function so that it can be called with pool
-    '''
-    energy_depositions = pickle.load(open('energy_depositions.pickle','rb'))
-    center_coor_en = pickle.load(open('center_coor_en.pickle','rb'))
-    mat_array = pickle.load(open('mat_array.pickle','rb'))
-    
-    return Superimpose(voxel_info['indices'],voxel_info['TERMA'],energy_depositions,center_coor_en,mat_array)
-    
     
 def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores):
     '''
+    Internal function called by Dose_Calculator().
+    
     Parameters:
     ----------
     kernel_arrays :: list of numpy arrays
@@ -529,7 +469,6 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
     y_voxels = np.linspace(0,Ny-2,Ny-1,dtype=np.uint16)
     z_voxels = np.linspace(0,Nz-2,Nz-1,dtype=np.uint16)
     
-    # this is where I can lower size of data too 
     voxel_array = np.array([[x,y,z] for x in x_voxels for y in y_voxels for z in z_voxels])
     
     energy_deposit = []
@@ -546,7 +485,7 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
         # this condition checks if it needs to remake the energy deposition arrays because the ray is at a different angle to the previous
         if ray == 0 or delta_x!=beam_coor[ray-1][0][1]-beam_coor[ray-1][0][0] or delta_y!=beam_coor[ray-1][1][1]-beam_coor[ray-1][1][0] or delta_z!=beam_coor[ray-1][2][1]-beam_coor[ray-1][2][0]:
             if delta_x == 0 and delta_y == 0 and delta_z == 0:
-                raise ValueError('Beam cannot have magnitude of 0.')
+                raise ValueError('Rays cannot have magnitude of 0. The problem might be that ray never enters the array.')
             elif delta_x == 0 and delta_y == 0:
                 kernel_basis = pre_rotated_ker
             elif delta_z == 0 and delta_x == 0:
@@ -611,67 +550,73 @@ def Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,
 
                 energy_depositions[index] = energy_depositions[index].reshape(int(num_voxel_in_eff_dist[0]),int(num_voxel_in_eff_dist[1]),int(num_voxel_in_eff_dist[2]))
         
-#         pickle.dump(energy_depositions,open('energy_depositions.pickle','wb'))
-#         pickle.dump(center_coor_en,open('center_coor_en.pickle','wb'))
-#         pickle.dump(mat_array,open('mat_array.pickle','wb'))
-        
-        # p = Pool(num_cores)
-        
-        # energy_deposit[ray] = p.map(mask_superimpose,voxel_info[ray])
-        
         energy_deposit[ray] = [Superimpose(voxel_info[ray][voxel_ind]['indices'],voxel_info[ray][voxel_ind]['TERMA'],energy_depositions,center_coor_en,mat_array) for voxel_ind in range(len(voxel_info[ray]))]
         
         energy_deposit[ray] = np.array(sum(energy_deposit[ray]))
-        # p.close()
-        print(ray)
+        # print('Ray #',ray,'complete.')
     
     energy_deposit = np.array(sum(energy_deposit))
     energy_deposit = energy_deposit.reshape(Nx-1,Ny-1,Nz-1)
     
     return energy_deposit
     
-def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,densities,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores=1,coeff_units='cm^2/g',percent_cutoff=1,air_index=None):
+def Dose_Calculator(num_voxels,voxel_lengths,beam_coor,ini_planes,beam_energy,ini_fluence,angle_spread,position_spread,densities,filenames,kernelnames,kernel_size,eff_distance,mat_array,num_cores=1,coeff_units='cm^2/g',percent_cutoff=1,air_index=None):
     '''
+    Function to be called by user. 
+    
     Parameters:
     ----------
-    num_planes :: tuple (3)
-      (Nx,Ny,Nz) for a CT array of (Nx-1,Ny-1,Nz-1) voxels
+    num_voxels :: tuple (3)
+      number of voxels in order of (x,y,z) 
     
     voxel_lengths :: tuple (3)
-      distances between the x,y,z planes (also the lengths of the sides of the voxels) in cm
+      lengths of the sides of the (x,y,z) voxels in cm
     
     beam_coor :: list of tuples (3,2)
       list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
       list contains one tuple for each ray 
+      NOTE: If ray falls exactly on boundary of two voxels, will deposit in one of the sides, not both. 
     
     ini_planes :: tuple (3)
-      initial plane coordinates
+      location of edge of (x,y,z) voxel arrays in cm
+      examples:
+         (-2.5,-2.5,-2.5) for a 5x5x5 cm phantom centered at (0,0,0)
+         (0,0,0) for a 2x2x2 cm phantom centered at (1,1,1)
+         (-3,-2,1) for a for 3x2x1 cm phantom centered at (-1.5,-1,1.5)
     
     beam_energy :: float 
       the energy of the beam in MeV
     
     ini_fluence :: float
       the initial photon fluence in cm^-2
+      this is given by number of photons per cross-section area of the beam
+      example:
+         2.5*10**7 for a beam with 10^8 photons with a cross-sectional area of 4cm^2
     
     angle_spread :: tuple (3)
-      angle of beam in (x,y,z) in radians
+      angle of beam spread in (x,y,z) in radians
+      WARNING: This parameter does not work properly and should be set to (0,0,0) unless actually working on code. 
+               It **might** work for a beam moving from +z to -z with anglular spread in y but requires more testing still
     
     position_spread :: tuple (3)
       position spread of beam in (x,y,z) in cm
+      NOTE: this parameter only matters if you are using angle_spread too and will not influence results for pencil beams
     
     densities :: list of float or numpy array
       list of densities of materials either in 1D list in same order as filenames and kernelnames parameters,
       or numpy array in same shape as mat_array
     
     filenames :: list of str 
-      list of name of the file that contains values for energy absorption coefficients in same order as densities and kernelnames parameters
+      list of names of the files that contain values for energy absorption coefficients in same order as densities and kernelnames parameters
+      see Extra/energy_absorption_coeffs.txt as an example of formatting 
     
     kernelnames :: list of str
       list of name or pathway of file from TOPAS that contains kernel information in same order as densities and filenames parameters
-      NOTE: kernels must have the same dimensions and number of bins in each direction
+      NOTE: If you update the contents of a kernel file without renaming, it will not run with the updates unless you remove the file with the kernel name + .npy
     
     kernel_size :: tuple (3)
       (x,y,z) dimensions of the kernels in cm 
+      NOTE: kernels must have the same dimensions and number of bins in each direction
     
     beam_coor :: list of tuples (3,2)
       list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
@@ -679,15 +624,18 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     
     eff_distance :: tuple (3)
       how far away from center in (x,y,z) does kernel have an effect (in cm)
+      must be less than kernel_size
+      the smaller this is, the faster the simulation will be to execute
     
     mat_array :: numpy array of integers
-      array in the shape of (Nx-1,Ny-1,Nz-1) giving the material type in that voxel by index of place of material in densities, kernelnames, and filenames, with indexing starting at 0 
+      array in the shape of (number of x voxels,number of y voxels,number of z voxels) giving the material type in that voxel by index of place of material in densities, kernelnames, and filenames, with indexing starting at 0 
       NOTE: DTYPE MUST BE INTEGERS NOT FLOATS
     
     Optional Parameters:
     -------------------
     num_cores :: integer 
-      number of cores to use (currently does not do anything else)
+      number of cores to use
+      NOTE: THIS PARAMETER DOES NOTHING
       Default: 1
     
     coeff_units :: str
@@ -708,6 +656,8 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
       numpy array in the same form as one gets from taking the data ['Sum'] from a topas2numpy BinnedResult object
     
     '''
+    num_planes = [num_voxels[0]+1,num_voxels[1]+1,num_voxels[2]+1]
+    
     if mat_array.dtype not in (int,np.int8,np.int16,np.int32,np.int64,np.uint8,np.uint16,np.uint32,np.uint64):
         raise ValueError('dtype of \'mat_array\' must be type of integer not float')
     
@@ -782,7 +732,8 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
     beam_energy = np.array(beam_energy)
     ini_fluence = np.array(ini_fluence)
     
-    # this is temporary for the fan beam case I'm working on rn
+    # THIS IS AN INCOMPLETE PART OF THIS FUNCTION: THIS WILL NOT WORK FOR ANY FAN BEAMS EXCEPT THIS ONE CASE
+    # this case is a fan beam moving from positive to negative z with spead in y direction
     if angle_spread[1] != 0:
         ini_fluence = ini_fluence*np.pi*position_spread[0]*position_spread[1]
         ini_fluence = ini_fluence/(2*angle_spread[1]*position_spread[0])
@@ -798,14 +749,13 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
                 raise ValueError('X-Ray beam cannot have length of 0. Adjust beam_coor parameter.')
             voxel_info.append(TERMA(num_planes,voxel_lengths,beam_coor[n],ini_planes,angle_spread,position_spread,beam_energy,ini_fluence/len(beam_coor),mu,percent_cutoff=percent_cutoff,mat_array=mat_array,air_index=air_index))
     
-    # I like having already as a percent of max but I know that it doesn't need to be 
     kernel_arrays = []
     for kernelname in kernelnames:
         if exists(kernelname + '.npy'):
             kernel_array = np.load(kernelname + '.npy')
         else:
-            kernel_array_raw = BinnedResult(kernelname).data['Sum'] # non-normalized array
-            kernel_array = kernel_array_raw/np.sum(kernel_array_raw) # normalized array
+            kernel_array_raw = BinnedResult(kernelname).data['Sum'] 
+            kernel_array = kernel_array_raw/np.sum(kernel_array_raw) 
             np.save(kernelname,kernel_array)
         kernel_arrays.append(kernel_array)
     
@@ -813,91 +763,8 @@ def Dose_Calculator(num_planes,voxel_lengths,beam_coor,ini_planes,beam_energy,in
         if index!=0 and np.shape(kernel_arrays[index])!=np.shape(kernel_arrays[index-1]):
             raise ValueError('All kernels must have same dimensions and number of bins.')
     
-    print('Calling Superposition')
+    # print('Calling Superposition')
     
     energy_deposit = Superposition(kernel_arrays,kernel_size,num_planes,voxel_lengths,voxel_info,beam_coor,eff_distance,mat_array,num_cores)
     return energy_deposit
 
-def MakeFanBeamRays(num_rays,angle_spread,beam_coor,direction='x',adjust=0.025,kind='linear'):
-    '''
-    Makes the rays for a fan beam. 
-    
-    Parameters:
-    ----------
-    num_rays :: int 
-      number of rays to make from the center (radius if ellipse and number in square grid)
-    
-    angle_spread :: tuple (3)
-      angle of farthest spread in the specified coordinate in radians
-    
-    beam_coor :: tuple (3,2)
-      initial and final coordinates of the center of the beam in the form ((x1,x2),(y1,y2),(z1,z2))
-    
-    direction :: str 
-      direction of the spread, is either 'x' or 'y'
-    
-    adjust :: float
-      how far from the center ray to double the rays so that beam isn't falling in the middle of two voxels
-    
-    Returns:
-    -------
-    beam_coors :: list of tuples (3,2)
-      list of initial and final coordinates of the ray in the form ((x1,x2),(y1,y2),(z1,z2)), 
-      list contains one tuple for each ray
-    
-    '''
-    def Gaussian(x,mu,sigma):
-        '''
-        '''
-        return np.exp(-0.5*((x-mu)/sigma)**2)/(sigma*np.sqrt(2*np.pi))
-    
-    delta_z = beam_coor[2][1] - beam_coor[2][0]
-    if kind == 'linear':
-        if direction == 'x':
-            phi = np.arctan((beam_coor[0][1] - beam_coor[0][0])/delta_z)
-            beam_coors = [((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]+adjust,beam_coor[1][1]+adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]+[((beam_coor[0][0],beam_coor[0][0]+delta_z*np.tan(theta+phi)),(beam_coor[1][0]-adjust,beam_coor[1][1]-adjust),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
-        elif direction == 'y':
-            phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
-            beam_coors_1 = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
-            beam_coors_2 = [((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in np.linspace(-angle_spread,angle_spread,num_rays//2)]
-            # beam_coors = [((beam[0][0],beam[0][1]),(beam[1][0]+adjust,beam[1][1]+adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] + [((beam[0][0],beam[0][1]),(beam[1][0]-adjust,beam[1][1]-adjust),(beam[2][0],beam[2][1])) for beam in beam_coors] 
-            beam_coors = [((beam_coors_1[len(beam_coors_1)-1-index][0][0],beam_coors_1[len(beam_coors_1)-1-index][0][1]),(beam_coors_1[len(beam_coors_1)-1-index][1][0]+adjust*((index-(len(beam_coors_1)-1)/2)*2/(len(beam_coors_1)-1)),beam_coors_1[len(beam_coors_1)-1-index][1][1]+adjust*((index-(len(beam_coors_1)-1)/2)*2/(len(beam_coors_1)-1))),(beam_coors_1[len(beam_coors_1)-1-index][2][0],beam_coors_1[len(beam_coors_1)-1-index][2][1])) for index in range(len(beam_coors_1))] + [((beam_coors_2[len(beam_coors_2)-1-index][0][0],beam_coors_2[len(beam_coors_2)-1-index][0][1]),(beam_coors_2[len(beam_coors_2)-1-index][1][0]+adjust*((index-(len(beam_coors_2)-1)/2)*2/(len(beam_coors_2)-1)),beam_coors_2[len(beam_coors_2)-1-index][1][1]+adjust*((index-(len(beam_coors_2)-1)/2)*2/(len(beam_coors_2)-1))),(beam_coors_2[len(beam_coors_2)-1-index][2][0],beam_coors_2[len(beam_coors_2)-1-index][2][1])) for index in range(len(beam_coors_2))]
-        else:
-            raise ValueError('direction variable must be \'x\' or \'y\'')
-            
-    elif kind == 'gaussian':
-        phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
-        angle_spread/np.exp(num_rays//4)
-        beam_coors = []
-        
-        # base = np.exp(1/(2*angle_spread**2))/(angle_spread*np.sqrt(2*np.pi))
-        base = 1.02
-        
-        # this will make everything out of order but that's fine
-        for n in range(num_rays//4):
-            beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
-            beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(-base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
-            beam_coors.append(((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
-            beam_coors.append(((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(-base**n*angle_spread/base**(num_rays//4)+phi)),(beam_coor[2][0],beam_coor[2][1])))
-        
-        beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(phi)),(beam_coor[2][0],beam_coor[2][1])))
-        beam_coors.append(((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+np.tan(phi)),(beam_coor[2][0],beam_coor[2][1])))
-        
-        
-#         number_rays = Gaussian(np.linspace(-angle_spread,angle_spread,num_rays//8),0,angle_spread)
-#         number_rays = (num_rays/np.sum(number_rays))*number_rays
-#         number_rays = np.array(np.ceil(number_rays),dtype=int)
-#         print(number_rays)
-        
-#         beam_coors = []
-#         for index in range(len(np.linspace(-angle_spread,angle_spread,num_rays//8))):
-#             for n in range(number_rays[index]):
-#                 beam_coors.append(((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(np.linspace(-angle_spread,angle_spread,num_rays//8)[index]+phi)),(beam_coor[2][0],beam_coor[2][1])))
-            
-    elif kind == 'trial':
-        phi = np.arctan((beam_coor[1][1] - beam_coor[1][0])/delta_z)
-        # beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]]+[((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in list(np.linspace(-angle_spread,angle_spread,num_rays//2))+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[40:250]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[90:200]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[140:160]+list(np.linspace(-angle_spread,angle_spread,num_rays//2))[145:155]]
-        from numpy import random as rnd
-        beam_coors = [((beam_coor[0][0]+adjust,beam_coor[0][1]+adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in rnd.normal(0,angle_spread,num_rays) if theta<=angle_spread and theta>=-angle_spread] #+ [((beam_coor[0][0]-adjust,beam_coor[0][1]-adjust),(beam_coor[1][0],beam_coor[1][0]+delta_z*np.tan(theta+phi)),(beam_coor[2][0],beam_coor[2][1])) for theta in rnd.normal(0,angle_spread/2,num_rays//2)]
-    
-    return beam_coors
